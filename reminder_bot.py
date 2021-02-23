@@ -172,4 +172,4 @@ async def getlist_codechef():
     conn.commit()
     conn_forces.commit()
 
-client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q.nST_LbKabzwBkm0kOZD8HiC5Pv0')
+client.run('TOKEN')
