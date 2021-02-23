@@ -8,6 +8,7 @@ import sqlite3
 from sqlite3 import Error
 
 from datetime import datetime
+import datetime as dt
 import time
 import re
 
@@ -48,23 +49,11 @@ def create_table(conn, create_table_sql):
 
 
 # insert records in table
-def insert_future_data(conn, future_contests):
-    
-    cursor = conn.cursor()
-    for items in future_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Future Contests` VALUES (?,?,?,0)', items)
-
-    conn.commit()
-
-    # cursor.execute('DELETE FROM `Future Contests` WHERE endTime < datetime("now", "localtime")')
-    # conn.commit()
-
-
 def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
     for items in present_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Present Contests` VALUES (?,?,?,0)', items)
+        cursor.execute('INSERT OR IGNORE INTO `Present Contests` VALUES (?,?,?,?,0)', items)
 
     conn.commit()
 
@@ -84,15 +73,6 @@ def extract_present_data():
     rows = driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr")
     
     rowsize = len(rows)
-    print(rowsize)
-        
-    # codes = []
-    # for i in range(0, rowsize):
-    #     WebDriverWait(driver, 10).until( 
-    #         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')) 
-    #     )
-    #     codes.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')[i].text)
-
 
     names = []
     for i in range(1, rowsize):
@@ -100,10 +80,9 @@ def extract_present_data():
             EC.presence_of_all_elements_located((By.XPATH, "//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[1]")) 
         )
         x=driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[1]")
-        # print(x[i].text)
         names.append(driver.find_elements_by_xpath('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[1]')[i-1].text)
     
-    print(names)
+    # print(names)
 
     startTime = []
     for i in range(1, rowsize):
@@ -113,10 +92,12 @@ def extract_present_data():
         # print(('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i].text)
         startTime.append(driver.find_elements_by_xpath('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i-1].text)
 
-    for i in startTime:
-        j = i[4:6] + ' ' + i[0:3] + ' '+i[7:11] + ' ' + i[12:17]
-        print(j)
-    
+    for start in range(1, rowsize):
+        i = startTime[start-1]
+        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[13:17] + ':00'
+        datetime_object = datetime.strptime(j, '%Y-%b-%d %H:%M:%S')
+        startTime[start-1] = datetime_object
+
 
     duration = []
     for i in range(1, rowsize):
@@ -125,73 +106,25 @@ def extract_present_data():
         )
         duration.append(driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[4]")[i-1].text)
 
-    # endTime = []
-    # for i in ends:
-    #     datetime_object = datetime.strptime(i, '%d %b %Y %H:%M:%S')
-    #     endTime.append(datetime_object)
+    for i in range(1, rowsize):
+        d = duration[i-1]
+        if d[1] == ':':
+            d= '0'+d
+        duration[i-1] = d
+        
 
-    lists = [names, startTime, duration]
+    endTime = []
+    for i in range(1, rowsize):
+        start = startTime[i-1]
+        delta = dt.timedelta(hours=int(duration[i-1][0:2]), minutes=int(duration[i-1][3:5]))
+        end = start + delta
+        endTime.append(end)
+
+    lists = [names, startTime, duration, endTime]
 
     present_contests = list(zip(*lists)) 
 
     return (present_contests)
-
-
-#######################################################  FUTURE CONTESTS ########################################################
-def extract_future_data():
-
-    WebDriverWait(driver, 10).until( 
-        EC.presence_of_all_elements_located((By.XPATH, "//*[@id='primary-content']/div/div[4]/table/tbody/tr")) 
-    )
-
-    rows = driver.find_elements_by_xpath("//*[@id='primary-content']/div/div[4]/table/tbody/tr")
-    
-    rowsize = len(rows)
-        
-    codes = []
-    for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[1]')) 
-        )
-        codes.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[1]')[i].text)
-
-
-    names = []
-    for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[2]')) 
-        )
-        names.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[2]')[i].text)
-
-    starts = []
-    for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[3]')) 
-        )
-        starts.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[3]')[i].text)
-    
-
-    ends = []
-    for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[4]')) 
-        )
-        ends.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[4]')[i].text)
-    
-    '''convert the endtime of a contest from "24 Oct 2020 12:30:00" format to "2020-10-24 12:30:00" format '''
-
-    endTime = []
-    for i in ends:
-        datetime_object = datetime.strptime(i, '%d %b %Y %H:%M:%S')
-        endTime.append(datetime_object)
-
-    driver.quit()
-    
-    lists = [codes, names, starts, ends, endTime]
-
-    future_contests = list(zip(*lists)) 
-
-    return (future_contests)
 
 
 def get_present_data(conn):
@@ -202,15 +135,6 @@ def get_present_data(conn):
 
     cursor.execute('UPDATE `Present Contests` SET is_added = 1 ')
     conn.commit()
-
-def get_future_data(conn):
-    
-    cursor = conn.cursor()
-    for item in cursor.execute('SELECT name,start,duration FROM `Future Contests` WHERE is_added = 0').fetchall():
-        list_future.append(item)
-
-    cursor.execute('UPDATE `Future Contests` SET is_added = 1 ')
-    conn.commit()
      
 def print_present_data(list_present):
 
@@ -218,26 +142,13 @@ def print_present_data(list_present):
     for item in list_present:
         print(item)
 
-def print_future_data(list_future):
-
-    print("\nFuture Data")
-    for item in list_future:
-        print(item)
-
-
 def main():
     
     # database location
     database = 'codeforces_new.db'
-    
-    # create_table_future = '''CREATE TABLE IF NOT EXISTS `Future Contests`(
-    #                 CODE text UNIQUE, NAME text,
-    #                 START text, END text, endTime datetime, 
-    #                 is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
-
     create_table_present = '''CREATE TABLE IF NOT EXISTS `Present Contests`(
                     NAME text,
-                    START text, DURATION text, 
+                    START text, DURATION text, END text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
     
@@ -245,51 +156,33 @@ def main():
 
     if conn is not None:
         create_table(conn, create_table_present)
-        # create_table(conn, create_table_future)
     else:
         print("Error! cannot create tha database connection.")
 
     
     driver.get(url)
-
-    print('x')
-    # finds a element with id "menu-309"
-    # contests = driver.find_element_by_id("menu-309")
     contests = WebDriverWait(driver, 10).until( 
         EC.presence_of_element_located((By.XPATH , "//div[@id='body']/div[3]/div[5]//ul/li[3]/a"))   #//div[@id='body']/div[3]/div[5]/ul/li[3]/a
     )
 
-    print('y')
 
 
     contests.click()
-
-    print('z')
 
     ''' Extract the records from the website and store it in a database table'''
     present_contests = extract_present_data()
     insert_present_data(conn, present_contests)
 
-    # future_contests = extract_future_data()
-    # insert_future_data(conn, future_contests)
-
     # get data from the tables
     get_present_data(conn)
-    # get_future_data(conn)
 
     #print data presents in the table
     print_present_data(list_present)
-    # print_future_data(list_future)
 
 
 if __name__ == "__main__":
      
     '''Lists to store records which were not included already''' 
     list_present = []   
-    # list_future = []    
 
     main()
-
-    
-
-    
