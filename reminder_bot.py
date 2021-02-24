@@ -32,11 +32,14 @@ async def on_ready():
 @client.command()
 async def codechef(ctx, pre_or_fut='Present'):
     # await ctx.send(pre_or_fut)
+    pre_or_fut = pre_or_fut[0].upper() + pre_or_fut[1:].lower()
+
+    if pre_or_fut not in ['Present', 'Future']:
+        pre_or_fut='Present'
     conn_command = sqlite3.connect('codechef_new.db')
     c_command = conn_command.cursor()
 
     contests = []
-    pre_or_fut = pre_or_fut[0].upper() + pre_or_fut[1:]
     c_command.execute(f"SELECT * FROM `{pre_or_fut} Contests` ORDER BY START")
     sorted_contests = c_command.fetchall()
 
@@ -51,10 +54,17 @@ async def codechef(ctx, pre_or_fut='Present'):
     )
     embed.set_author(name = 'Visit the website <HERE> for more info', url='https://www.codechef.com/')
 
-    for i in sorted_contests:
-        name = i[1]
-        end_time = i[3][:11] +' '+ i[3][13:]
-        embed.add_field(name=name, value=f'Ends on: {end_time}', inline=False)
+    if pre_or_fut=='Present':
+        for i in sorted_contests:
+            name = i[1]
+            end_time = i[3][:11] +' '+ i[3][13:]
+            embed.add_field(name=name, value=f'Ends on: {end_time}', inline=False)
+
+    else:
+        for i in sorted_contests:
+            name = i[1]
+            start_time = i[2]
+            embed.add_field(name=name, value=f'Starts on: {start_time}', inline=False)
 
     await ctx.send(embed=embed)
     conn_command.close()
@@ -66,7 +76,7 @@ async def codeforces(ctx):
     c_command = conn_command.cursor()
 
     contests = []
-    c_command.execute(f"SELECT * FROM `Present Contests` ORDER BY START")
+    c_command.execute("SELECT * FROM `Present Contests` ORDER BY START")
     sorted_contests = c_command.fetchall()
 
     # await ctx.send(sorted_contests)
@@ -74,15 +84,17 @@ async def codeforces(ctx):
         await ctx.send("No Contests")
         return
     embed = discord.Embed(
-        title = f'!Upcoming Contests On Codeforces!',
+        title = '!Upcoming Contests On Codeforces!',
         description = '',
         colour = discord.Colour.green()
     )
     embed.set_author(name = 'Visit the website <HERE> for more info', url='https://www.codeforces.com/')
 
+    # print(len(sorted_contests))
+    # print(sorted_contests)
     for i in sorted_contests:
         name = i[0]
-        time = 'Start time: '+ i[1][:11] +' '+ i[1][13:17] + '\nDuration: ' + i[2]
+        time = 'Start time: '+ i[1]+ '\nEnds at: ' + i[3]
         embed.add_field(name=name, value=time, inline=False)
 
     await ctx.send(embed=embed)
@@ -91,7 +103,7 @@ async def codeforces(ctx):
 
 @client.event
 async def on_reminder(coming, coming_forces):
-    channel_code = client.get_channel("INSERT CHANNEL")
+    channel_code = client.get_channel(808426388716519468)
     if len(coming)==0:
         await channel_code.send("No contests available")
         return
@@ -108,11 +120,16 @@ async def on_reminder(coming, coming_forces):
         start_time = i[2]
         embed.add_field(name=name, value=start_time, inline=False)
 
-    embed.add_field(name='\nCODEFORCES',value='Here is the list of ongoing codeforces contests', inline=False)
+    embed.add_field(name='\nCODEFORCES',value='Here is the list of upcoming codeforces contests', inline=False)
     for i in coming_forces:
         name = i[0]
         start_time = i[1]
         embed.add_field(name = name, value= start_time, inline=False)
+
+    if len(coming_forces)==0:
+        name = "No Upcoming Contests"
+        val = None
+        embed.add_field(name = name, value = val, inline=False)
 
     await channel_code.send(embed=embed)
 
@@ -149,8 +166,8 @@ async def getlist_codechef():
 
     try:
         for event in sorted_events_forces:
-            print(dtime.strptime(event[1][:17], '%b/%d/%Y %H:%M'))
-            if dtime.strptime(event[1][:17], '%b/%d/%Y %H:%M')<bracket:
+            print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))
+            if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S')<bracket:
                 upcoming_forces.append(event)
             else:
                 pass
@@ -165,4 +182,4 @@ async def getlist_codechef():
     conn.commit()
     conn_forces.commit()
 
-client.run('"INSERT TOKEN"')
+client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q.hU1YIeMarvDTs6C9bh6qnhNk464')

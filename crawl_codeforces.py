@@ -147,7 +147,7 @@ def main():
     # database location
     database = 'codeforces_new.db'
     create_table_present = '''CREATE TABLE IF NOT EXISTS `Present Contests`(
-                    NAME text,
+                    NAME text UNIQUE,
                     START text, DURATION text, END text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
