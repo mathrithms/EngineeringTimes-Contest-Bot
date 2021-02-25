@@ -4,10 +4,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC 
 
-import sqlite3
-from sqlite3 import Error
+import psycopg2 
+from psycopg2 import Error
 
 from datetime import datetime
+import datetime as dt
 import time
 import re
 
@@ -18,6 +19,7 @@ chrome_options = Options()
 chrome_options.headless = True 
 chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
+
 driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options) 
 
 
@@ -25,17 +27,10 @@ driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options)
 url = 'https://codeforces.com/'
 
 
-# create a database connection
-def create_connection(db_file):
-    
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
 
-    return conn
+
+    
+    
 
 # create tables in database
 def create_table(conn, create_table_sql):
@@ -52,7 +47,7 @@ def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
     for items in present_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Present Contests` VALUES (?,?,?,0)', items)
+        cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
 
     conn.commit()
 
@@ -72,14 +67,6 @@ def extract_present_data():
     rows = driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr")
     
     rowsize = len(rows)
-        
-    # codes = []
-    # for i in range(0, rowsize):
-    #     WebDriverWait(driver, 10).until( 
-    #         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')) 
-    #     )
-    #     codes.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')[i].text)
-
 
     names = []
     for i in range(1, rowsize):
@@ -87,7 +74,6 @@ def extract_present_data():
             EC.presence_of_all_elements_located((By.XPATH, "//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[1]")) 
         )
         x=driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[1]")
-        # print(x[i].text)
         names.append(driver.find_elements_by_xpath('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[1]')[i-1].text)
     
     # print(names)
@@ -100,6 +86,13 @@ def extract_present_data():
         # print(('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i].text)
         startTime.append(driver.find_elements_by_xpath('//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i-1].text)
 
+    for start in range(1, rowsize):
+        i = startTime[start-1]
+        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[13:17] + ':00'
+        datetime_object = datetime.strptime(j, '%Y-%b-%d %H:%M:%S')
+        startTime[start-1] = datetime_object
+
+
     duration = []
     for i in range(1, rowsize):
         WebDriverWait(driver, 20).until( 
@@ -107,12 +100,21 @@ def extract_present_data():
         )
         duration.append(driver.find_elements_by_xpath("//div[@id='pageContent']/div[1]/div[1]/div[6]/table/tbody/tr['+i+']/td[4]")[i-1].text)
 
-    # endTime = []
-    # for i in ends:
-    #     datetime_object = datetime.strptime(i, '%d %b %Y %H:%M:%S')
-    #     endTime.append(datetime_object)
+    for i in range(1, rowsize):
+        d = duration[i-1]
+        if d[1] == ':':
+            d= '0'+d
+        duration[i-1] = d
+        
 
-    lists = [names, startTime, duration]
+    endTime = []
+    for i in range(1, rowsize):
+        start = startTime[i-1]
+        delta = dt.timedelta(hours=int(duration[i-1][0:2]), minutes=int(duration[i-1][3:5]))
+        end = start + delta
+        endTime.append(end)
+
+    lists = [names, startTime, duration, endTime]
 
     present_contests = list(zip(*lists)) 
 
@@ -122,10 +124,12 @@ def extract_present_data():
 def get_present_data(conn):
     
     cursor = conn.cursor()
-    for item in cursor.execute('SELECT name,start,duration FROM `Present Contests`WHERE is_added = 0').fetchall():
+    cursor.execute('SELECT name,start,duration FROM Present_Contests WHERE is_added = 0')
+    list_p=cursor.fetchall()
+    for item in list_p:
         list_present.append(item)
 
-    cursor.execute('UPDATE `Present Contests` SET is_added = 1 ')
+    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
     conn.commit()
      
 def print_present_data(list_present):
@@ -136,15 +140,18 @@ def print_present_data(list_present):
 
 def main():
     
-    # database location
-    database = 'codeforces_new.db'
-    create_table_present = '''CREATE TABLE IF NOT EXISTS `Present Contests`(
-                    NAME text,
-                    START text, DURATION text, 
+    # database connection
+    conn = None
+    try:
+        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+    except Error as e:
+        print(e)
+
+    create_table_present = '''CREATE TABLE Present_Contests(
+                    NAME text UNIQUE,
+                    START text, DURATION text, ENDt text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
-    
-    conn = create_connection(database)
 
     if conn is not None:
         create_table(conn, create_table_present)
