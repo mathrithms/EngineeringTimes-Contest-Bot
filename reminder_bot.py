@@ -90,8 +90,6 @@ async def codeforces(ctx):
     )
     embed.set_author(name = 'Visit the website <HERE> for more info', url='https://www.codeforces.com/')
 
-    # print(len(sorted_contests))
-    # print(sorted_contests)
     for i in sorted_contests:
         name = i[0]
         time = 'Start time: '+ i[1]+ '\nEnds at: ' + i[3]
@@ -139,7 +137,7 @@ async def getlist_codechef():
 
     now = dtime.now()
     delta = datetime.timedelta(hours=24)
-    bracket = now + delta     # 5 minutes from now
+    bracket = now + delta     # 24 hours from now
 
     c = conn.cursor()
     c_forces = conn_forces.cursor()
@@ -149,31 +147,26 @@ async def getlist_codechef():
     c_forces.execute("SELECT * FROM `Present Contests` ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
 
-    upcoming = []     # to store all the events in the next 5 minutes
+    upcoming = []     # to store all the events in the next 24 hours
     upcoming_forces = []
 
-    try:
-        most_recent = sorted_events[0]        # chronologically first event, if there are no events it will raise an IndexError
-        for event in sorted_events:      #else, store all the events with the same start_time as the upcoming event nto upcoming list
-            if dtime.strptime(event[4], '%Y-%m-%d %H:%M:%S')>bracket:
-                upcoming.append(event)
-            else:
-                c.execute("DELETE FROM scheduler WHERE endTime = ?", (event[4],))        # here we have to call another event with this upcoming list as parameter, that will send an embed to a particular channel
-    except IndexError:
-        print('no contests')
-        return
+    # try:
+        # most_recent = sorted_events[0]
+    for event in sorted_events:      #store all the upcoming event into upcoming list
+        # if dtime.strptime(event[4], '%Y-%m-%d %H:%M:%S')>bracket:
+        upcoming.append(event)
+        # else:
+            # pass
 
 
-    try:
-        for event in sorted_events_forces:
-            print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))
-            if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S')<bracket:
-                upcoming_forces.append(event)
-            else:
-                pass
-    except IndexError:
-        print('no contests')
-        return
+    
+    for event in sorted_events_forces:
+        print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))
+        if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S')<bracket:
+            upcoming_forces.append(event)
+        else:
+            pass
+    
 
     client.dispatch("reminder", upcoming, upcoming_forces)
 
@@ -182,4 +175,4 @@ async def getlist_codechef():
     conn.commit()
     conn_forces.commit()
 
-client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q.hU1YIeMarvDTs6C9bh6qnhNk464')
+client.run('TOKEN')
