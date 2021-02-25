@@ -101,7 +101,7 @@ async def codeforces(ctx):
 
 @client.event
 async def on_reminder(coming, coming_forces):
-    channel_code = client.get_channel(808426388716519468)
+    channel_code = client.get_channel(INSERT CHANNEL HERE)
     if len(coming)==0:
         await channel_code.send("No contests available")
         return
