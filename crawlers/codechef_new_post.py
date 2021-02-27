@@ -18,7 +18,6 @@ chrome_options = Options()
 chrome_options.headless = True 
 chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
-
 driver = webdriver.Chrome(executable_path=PATH, options=chrome_options) 
 
 
@@ -217,7 +216,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password= pass")
 
     except Error as e:
         print(e)
