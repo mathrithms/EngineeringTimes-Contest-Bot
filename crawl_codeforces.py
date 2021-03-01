@@ -4,8 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC 
 
-import sqlite3
-from sqlite3 import Error
+import psycopg2 
+from psycopg2 import Error
 
 from datetime import datetime
 import datetime as dt
@@ -26,17 +26,10 @@ driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options)
 url = 'https://codeforces.com/'
 
 
-# create a database connection
-def create_connection(db_file):
-    
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
 
-    return conn
+
+    
+    
 
 # create tables in database
 def create_table(conn, create_table_sql):
@@ -53,7 +46,7 @@ def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
     for items in present_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Present Contests` VALUES (?,?,?,?,0)', items)
+        cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
 
     conn.commit()
 
@@ -130,10 +123,12 @@ def extract_present_data():
 def get_present_data(conn):
     
     cursor = conn.cursor()
-    for item in cursor.execute('SELECT name,start,duration FROM `Present Contests`WHERE is_added = 0').fetchall():
+    cursor.execute('SELECT name,start,duration FROM Present_Contests WHERE is_added = 0')
+    list_p=cursor.fetchall()
+    for item in list_p:
         list_present.append(item)
 
-    cursor.execute('UPDATE `Present Contests` SET is_added = 1 ')
+    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
     conn.commit()
      
 def print_present_data(list_present):
@@ -144,15 +139,18 @@ def print_present_data(list_present):
 
 def main():
     
-    # database location
-    database = 'codeforces_new.db'
-    create_table_present = '''CREATE TABLE IF NOT EXISTS `Present Contests`(
+    # database connection
+    conn = None
+    try:
+        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
+    except Error as e:
+        print(e)
+
+    create_table_present = '''CREATE TABLE Present_Contests(
                     NAME text UNIQUE,
-                    START text, DURATION text, END text,
+                    START text, DURATION text, ENDt text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
-    
-    conn = create_connection(database)
 
     if conn is not None:
         create_table(conn, create_table_present)

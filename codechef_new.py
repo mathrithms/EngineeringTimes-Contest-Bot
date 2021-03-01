@@ -4,8 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC 
 
-import sqlite3
-from sqlite3 import Error
+import psycopg2
+from psycopg2 import Error
 
 from datetime import datetime
 import time
@@ -18,24 +18,12 @@ chrome_options = Options()
 chrome_options.headless = True 
 chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
-driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options) 
+driver = webdriver.Chrome(executable_path=PATH, options=chrome_options) 
 
 
 # url to crawl
 url = 'https://www.codechef.com/'
 
-
-# create a database connection
-def create_connection(db_file):
-    
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except Error as e:
-        print(e)
-
-    return conn
 
 # create tables in database
 def create_table(conn, create_table_sql):
@@ -51,28 +39,31 @@ def create_table(conn, create_table_sql):
 def insert_future_data(conn, future_contests):
     
     cursor = conn.cursor()
-    for items in future_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Future Contests` VALUES (?,?,?,?,?,0)', items)
+    try:
+        for items in future_contests:
+            cursor.execute('INSERT INTO Future_Contests VALUES (%s,%s,%s,%s,%s,0)', items)
 
-    conn.commit()
+        conn.commit()
 
-    cursor.execute('DELETE FROM `Future Contests` WHERE endTime < datetime("now", "localtime")')
-    conn.commit()
+        cursor.execute('DELETE FROM Future_Contests WHERE endTime < timestamp("now", "localtime")')
+        conn.commit()
+    except:
+        conn.rollback()
 
 
 def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
-    for items in present_contests:
-        cursor.execute('INSERT OR IGNORE INTO `Present Contests` VALUES (?,?,?,?,?,0)', items)
+    try:
+            for items in present_contests:
+                    cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,%s,0)', items)
+            conn.commit()
 
-    conn.commit()
-
-
-    # Delete record if the contest has ended.
-    cursor.execute('DELETE FROM `Present Contests` WHERE endTime < datetime("now", "localtime")')
-    conn.commit()
-
+            # Delete record if the contest has ended.
+            cursor.execute('DELETE FROM Present_Contests WHERE endTime < timestamp("now", "localtime")')
+            conn.commit()
+    except:
+        conn.rollback()
 
 #######################################################  PRESENT CONTESTS ########################################################
 def extract_present_data():
@@ -187,19 +178,24 @@ def extract_future_data():
 def get_present_data(conn):
     
     cursor = conn.cursor()
-    for item in cursor.execute('SELECT code,name,start,end FROM `Present Contests`WHERE is_added = 0').fetchall():
+    cursor.execute('SELECT code,name,start,endt FROM Present_Contests WHERE is_added = 0')
+    list_p=cursor.fetchall()
+    for item in list_p:
         list_present.append(item)
+        
 
-    cursor.execute('UPDATE `Present Contests` SET is_added = 1 ')
+    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
     conn.commit()
 
 def get_future_data(conn):
     
     cursor = conn.cursor()
-    for item in cursor.execute('SELECT code,name,start,end FROM `Future Contests` WHERE is_added = 0').fetchall():
+    cursor.execute('SELECT code,name,start,endt FROM Future_Contests WHERE is_added = 0')
+    list_f=cursor.fetchall()
+    for item in list_f:
         list_future.append(item)
 
-    cursor.execute('UPDATE `Future Contests` SET is_added = 1 ')
+    cursor.execute('UPDATE Future_Contests SET is_added = 1 ')
     conn.commit()
      
 def print_present_data(list_present):
@@ -217,21 +213,26 @@ def print_future_data(list_future):
 
 def main():
     
-    # database location
-    database = 'codechef_new.db'
-    
-    create_table_future = '''CREATE TABLE IF NOT EXISTS `Future Contests`(
-                    CODE text UNIQUE, NAME text,
-                    START text, END text, endTime datetime, 
-                    is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
+    # database connection
+    conn = None
+    try:
+        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=port user=postgres password= pass")
 
-    create_table_present = '''CREATE TABLE IF NOT EXISTS `Present Contests`(
-                    CODE text UNIQUE, NAME text,
-                    START text, END text, endTime datetime, 
-                    is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
+    except Error as e:
+        print(e)
 
     
-    conn = create_connection(database)
+    create_table_future = '''CREATE TABLE Future_Contests(
+                    CODE text UNIQUE, NAME text,
+                    START text, ENDt text, endTime timestamp, 
+                    is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
+
+    create_table_present = '''CREATE TABLE Present_Contests(
+                    CODE text UNIQUE, NAME text,
+                    START text, ENDt text, endTime timestamp, 
+                    is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
+
+    
 
     if conn is not None:
         create_table(conn, create_table_present)
