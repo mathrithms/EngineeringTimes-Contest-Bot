@@ -142,7 +142,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
+        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=port user=postgres password=pass")
     except Error as e:
         print(e)
 
