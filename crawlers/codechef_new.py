@@ -41,11 +41,11 @@ def insert_future_data(conn, future_contests):
     cursor = conn.cursor()
     try:
         for items in future_contests:
-            cursor.execute('INSERT INTO Future_Contests VALUES (%s,%s,%s,%s,%s,0)', items)
+            cursor.execute('INSERT INTO future_contests VALUES (%s,%s,%s,%s,%s,0)', items)
 
         conn.commit()
 
-        cursor.execute('DELETE FROM Future_Contests WHERE endTime < timestamp("now", "localtime")')
+        cursor.execute('DELETE FROM future_contests WHERE endTime < timestamp("now", "localtime")')
         conn.commit()
     except:
         conn.rollback()
@@ -55,13 +55,13 @@ def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
     try:
-            for items in present_contests:
-                    cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,%s,0)', items)
-            conn.commit()
+        for items in present_contests:
+                cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
+        conn.commit()
 
-            # Delete record if the contest has ended.
-            cursor.execute('DELETE FROM Present_Contests WHERE endTime < timestamp("now", "localtime")')
-            conn.commit()
+    # Delete record if the contest has ended.
+    cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
+    conn.commit()
     except:
         conn.rollback()
 
@@ -113,7 +113,7 @@ def extract_present_data():
 
     lists = [codes, names, startTime, ends, endTime]
 
-    present_contests = list(zip(*lists)) 
+    present_contests = list(zip(*lists))
 
     return (present_contests)
 
@@ -178,24 +178,24 @@ def extract_future_data():
 def get_present_data(conn):
     
     cursor = conn.cursor()
-    cursor.execute('SELECT code,name,start,endt FROM Present_Contests WHERE is_added = 0')
+    cursor.execute('SELECT code,name,start,endt FROM present_contests WHERE is_added = 0')
     list_p=cursor.fetchall()
     for item in list_p:
         list_present.append(item)
         
 
-    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
+    cursor.execute('UPDATE present_contests SET is_added = 1 ')
     conn.commit()
 
 def get_future_data(conn):
     
     cursor = conn.cursor()
-    cursor.execute('SELECT code,name,start,endt FROM Future_Contests WHERE is_added = 0')
+    cursor.execute('SELECT code,name,start,endt FROM future_contests WHERE is_added = 0')
     list_f=cursor.fetchall()
     for item in list_f:
         list_future.append(item)
 
-    cursor.execute('UPDATE Future_Contests SET is_added = 1 ')
+    cursor.execute('UPDATE future_contests SET is_added = 1 ')
     conn.commit()
      
 def print_present_data(list_present):
@@ -216,18 +216,18 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password= pass")
+        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
 
     except Error as e:
         print(e)
 
     
-    create_table_future = '''CREATE TABLE Future_Contests(
+    create_table_future = '''CREATE TABLE future_contests(
                     CODE text UNIQUE, NAME text,
                     START text, ENDt text, endTime timestamp, 
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
-    create_table_present = '''CREATE TABLE Present_Contests(
+    create_table_present = '''CREATE TABLE present_contests(
                     CODE text UNIQUE, NAME text,
                     START text, ENDt text, endTime timestamp, 
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
@@ -274,7 +274,3 @@ if __name__ == "__main__":
     list_future = []    
 
     main()
-
-    
-
-    
