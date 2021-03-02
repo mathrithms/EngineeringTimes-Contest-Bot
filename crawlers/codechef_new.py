@@ -55,13 +55,13 @@ def insert_present_data(conn, present_contests):
     
     cursor = conn.cursor()
     try:
-        for items in present_contests:
-                cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
-        conn.commit()
+            for items in present_contests:
+                    cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
+            conn.commit()
 
-    # Delete record if the contest has ended.
-    cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
-    conn.commit()
+            # Delete record if the contest has ended.
+            cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
+            conn.commit()
     except:
         conn.rollback()
 
@@ -113,7 +113,7 @@ def extract_present_data():
 
     lists = [codes, names, startTime, ends, endTime]
 
-    present_contests = list(zip(*lists))
+    present_contests = list(zip(*lists)) 
 
     return (present_contests)
 
