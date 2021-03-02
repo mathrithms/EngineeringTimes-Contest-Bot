@@ -2,22 +2,20 @@ import discord
 from discord.ext import commands, tasks
 
 import psycopg2
-from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
-import time
 
-#setting up connections to both the databases
+# setting up connections to both the databases
 conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
 conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
 conn_info = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
 
-#switching on intents and defining the bot
-intents = discord.Intents(messages=True, guilds = True, reactions = True, members = True, presences = True)
-client = commands.Bot(command_prefix = '!', intents = intents)
+# switching on intents and defining the bot
+intents=discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
+client=commands.Bot(command_prefix='!', intents=intents)
 
-#start the task when bot goes online
+# start the task when bot goes online
 @client.event
 async def on_ready():
     getlist_codechef.start()
@@ -25,22 +23,22 @@ async def on_ready():
 
 
 @client.command()
-async def setup(ctx, channel:discord.TextChannel):
-    cursor_info = conn_info.cursor()
+async def setup(ctx, channel: discord.TextChannel):
+    cursor_info=conn_info.cursor()
 
-    #getting server ID as string to navigate the database
-    server = str(ctx.guild.id)
-    cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD = %s",(server,))
+    # getting server ID as string to navigate the database
+    server=str(ctx.guild.id)
+    cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD = %s", (server, ))
 
-    #storing the row which contains this server ID
-    old_channel = cursor_info.fetchone()
+    # storing the row which contains this server ID
+    old_channel=cursor_info.fetchone()
 
-    #in case of no such row, new row will be made
+    # in case of no such row, new row will be made
     if old_channel is None:
-        cursor_info.execute(("INSERT INTO info VALUES (%s,%s,%s)"), (server,str(channel.id),ctx.guild.name))
+        cursor_info.execute(("INSERT INTO info VALUES (%s, %s, %s)"), (server, str(channel.id), ctx.guild.name))
         await ctx.send(f"Your channel has been set to {channel.mention}")
 
-    #if row is already there, channel ID will be updated
+    # if row is already there, channel ID will be updated
     elif old_channel!=None:
         cursor_info.execute(("UPDATE info SET CHANNEL = %s WHERE GUILD = %s"), (str(channel.id), server))
         await ctx.send(f"Your channel has been updated to {channel.mention}")
