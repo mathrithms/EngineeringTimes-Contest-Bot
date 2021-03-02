@@ -1,24 +1,22 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait 
-from selenium.webdriver.support import expected_conditions as EC 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import psycopg2
 from psycopg2 import Error
 
 from datetime import datetime
-import time
-import re
 
 # web Driver path
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 
-chrome_options = Options()  
-chrome_options.headless = True 
+chrome_options = Options()
+chrome_options.headless = True
 chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
-driver = webdriver.Chrome(executable_path=PATH, options=chrome_options) 
+driver = webdriver.Chrome(executable_path=PATH, options=chrome_options)
 
 
 # url to crawl
@@ -27,7 +25,7 @@ url = 'https://www.codechef.com/'
 
 # create tables in database
 def create_table(conn, create_table_sql):
-    
+
     try:
         c = conn.cursor()
         c.execute(create_table_sql)
@@ -37,7 +35,7 @@ def create_table(conn, create_table_sql):
 
 # insert records in table
 def insert_future_data(conn, future_contests):
-    
+
     cursor = conn.cursor()
     try:
         for items in future_contests:
@@ -52,52 +50,55 @@ def insert_future_data(conn, future_contests):
 
 
 def insert_present_data(conn, present_contests):
-    
+
     cursor = conn.cursor()
     try:
-            for items in present_contests:
-                    cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
-            conn.commit()
+        for items in present_contests:
+            cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
+        conn.commit()
 
-            # Delete record if the contest has ended.
-            cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
-            conn.commit()
+        # Delete record if the contest has ended.
+        cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
+        conn.commit()
     except:
         conn.rollback()
 
-#######################################################  PRESENT CONTESTS ########################################################
+
+# PRESENT CONTESTS
 def extract_present_data():
-    
-    WebDriverWait(driver, 10).until( 
-        EC.presence_of_all_elements_located((By.XPATH, "//*[@id='primary-content']/div/div[3]/table/tbody/tr")) 
+
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//*[@id='primary-content']/div/div[3]/table/tbody/tr"))
     )
 
     rows = driver.find_elements_by_xpath("//*[@id='primary-content']/div/div[3]/table/tbody/tr")
-    
+
     rowsize = len(rows)
-        
+
     codes = []
     for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')) 
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]'))
         )
-        codes.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')[i].text)
-
+        codes.append(driver.find_elements_by_xpath(
+            '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[1]')[i].text
+        )
 
     names = []
     for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[2]')) 
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[2]'))
         )
-        names.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[2]')[i].text)
+        names.append(driver.find_elements_by_xpath(
+            '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[2]')[i].text
+        )
 
     startTime = []
     for i in range(0, rowsize):
-        WebDriverWait(driver, 10).until( 
-            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[3]')) 
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[3]'))
         )
         startTime.append(driver.find_elements_by_xpath('//*[@id="primary-content"]/div/div[3]/table/tbody/tr["+i+"]/td[3]')[i].text)
-    
 
     ends = []
     for i in range(0, rowsize):
