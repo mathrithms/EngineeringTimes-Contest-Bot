@@ -231,7 +231,7 @@ async def getlist_codechef():
         for i in a:
             # check which channel has been mapped to which server
             guild_id = str(i.id)
-            cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD =%s",(guild_id,) )
+            cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD =%s", (guild_id,))
             guild = cursor_info.fetchone()
 
             # if a channel is not found, it means it has not been set up
