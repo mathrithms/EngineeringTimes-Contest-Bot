@@ -1,35 +1,28 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait 
-from selenium.webdriver.support import expected_conditions as EC 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 import psycopg2 
 from psycopg2 import Error
 
 from datetime import datetime
 import datetime as dt
-import time
-import re
 
 # web Driver path
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 
-chrome_options = Options()  
-chrome_options.headless = True 
+chrome_options = Options()
+chrome_options.headless = True
 chrome_options.binary_location = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 
-driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options) 
+driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options)
 
 
 # url to crawl
 url = 'https://codeforces.com/'
 
-
-
-
-    
-    
 
 # create tables in database
 def create_table(conn, create_table_sql):
