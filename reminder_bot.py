@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 
 import psycopg2
+from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
@@ -242,7 +243,8 @@ async def getlist_codechef():
             elif guild is not None:
                 client.dispatch("reminder", upcoming, upcoming_forces, int(guild[0]))
             conn_info.commit()
-    except:
+    except Error as e:
+        print(e)
         conn_info.rollback()
 
     print(upcoming, '\n', upcoming_forces)
