@@ -25,9 +25,9 @@ async def on_ready():
 
 
 @client.command()
-async def setup(ctx, channel: discord.TextChannel):
+async def setup(ctx):
     cursor_info = conn_info.cursor()
-
+    channel = ctx.channel
     # getting server ID as string to navigate the database
     server = str(ctx.guild.id)
     cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD = %s", (server, ))
@@ -54,8 +54,8 @@ async def setup(ctx, channel: discord.TextChannel):
 @setup.error
 async def setup_error(ctx, error):
     # if no channel is given
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Pass a channel ID')
+    if isinstance(error, commands.ChannelNotFound):
+        await ctx.send('Pass a channel ID, this is INVALID')
 
     # if invalid channel is given
     elif isinstance(error, commands.ChannelNotFound):
