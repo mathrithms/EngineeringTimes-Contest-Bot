@@ -68,7 +68,7 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut='Present'
     
-    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
 
