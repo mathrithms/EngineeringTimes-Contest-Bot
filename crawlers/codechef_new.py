@@ -30,6 +30,7 @@ def create_table(conn, create_table_sql):
         c = conn.cursor()
         c.execute(create_table_sql)
     except Error as e:
+        conn.rollback()
         print(e)
 
 
@@ -37,33 +38,37 @@ def create_table(conn, create_table_sql):
 def insert_future_data(conn, future_contests):
 
     cursor = conn.cursor()
-    try:
-        for items in future_contests:
+    cursor.execute('DELETE FROM future_contests')
+    for items in future_contests:
+        try:
             cursor.execute('INSERT INTO future_contests VALUES (%s,%s,%s,%s,%s,0)', items)
+        except Error as e:
+            conn.rollback()
+            print(e)
 
-        conn.commit()
+    conn.commit()
 
-        cursor.execute('DELETE FROM future_contests WHERE endTime < timestamp("now", "localtime")')
-        conn.commit()
-    except Error as e:
-        print(e)
-        conn.rollback()
+    cursor.execute('DELETE FROM future_contests WHERE endTime < NOW()')
+    conn.commit()
+    cursor.close()
 
 
 def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
-    try:
-        for items in present_contests:
+    cursor.execute('DELETE FROM present_contests')
+    for items in present_contests:
+        try:
             cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
-        conn.commit()
+        except Error as e:
+            conn.rollback()
+            print(e)
+    conn.commit()
 
-        # Delete record if the contest has ended.
-        cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
-        conn.commit()
-    except Error as e:
-        print(e)
-        conn.rollback()
+    # Delete record if the contest has ended.
+    cursor.execute('DELETE FROM present_contests WHERE endTime < NOW()')
+    conn.commit()
+    cursor.close()
 
 
 # PRESENT CONTESTS
@@ -119,6 +124,7 @@ def extract_present_data():
     lists = [codes, names, startTime, ends, endTime]
 
     present_contests = list(zip(*lists))
+    # print(present_contests)
 
     return (present_contests)
 
@@ -196,6 +202,7 @@ def get_present_data(conn):
 
     cursor.execute('UPDATE present_contests SET is_added = 1 ')
     conn.commit()
+    cursor.close()
 
 
 def get_future_data(conn):
@@ -208,6 +215,7 @@ def get_future_data(conn):
 
     cursor.execute('UPDATE future_contests SET is_added = 1 ')
     conn.commit()
+    cursor.close()
 
 
 def print_present_data(list_present):
@@ -229,9 +237,10 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
 
     except Error as e:
+        conn.rollback()
         print(e)
 
     create_table_future = '''CREATE TABLE future_contests(

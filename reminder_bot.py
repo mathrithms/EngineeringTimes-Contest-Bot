@@ -8,9 +8,9 @@ import datetime
 from datetime import datetime as dtime
 
 # setting up connections to both the databases
-conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
-conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
-conn_info = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+conn_info = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
 
 # switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
@@ -20,14 +20,14 @@ client = commands.Bot(command_prefix='!', intents=intents)
 # start the task when bot goes online
 @client.event
 async def on_ready():
-    getlist_codechef.start()
+    getlist.start()
     print('hey')
 
 
 @client.command()
-async def setup(ctx, channel: discord.TextChannel):
+async def setup(ctx):
     cursor_info = conn_info.cursor()
-
+    channel = ctx.channel
     # getting server ID as string to navigate the database
     server = str(ctx.guild.id)
     cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD = %s", (server, ))
@@ -54,8 +54,8 @@ async def setup(ctx, channel: discord.TextChannel):
 @setup.error
 async def setup_error(ctx, error):
     # if no channel is given
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Pass a channel ID')
+    if isinstance(error, commands.ChannelNotFound):
+        await ctx.send('Pass a channel ID, this is INVALID')
 
     # if invalid channel is given
     elif isinstance(error, commands.ChannelNotFound):
@@ -70,7 +70,7 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut = 'Present'
 
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -113,7 +113,7 @@ async def codechef(ctx, pre_or_fut='Present'):
 @client.command()
 async def codeforces(ctx):
     # await ctx.send(pre_or_fut)
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -180,17 +180,18 @@ async def on_reminder(coming, coming_forces, channel):
         embed.add_field(name=name, value=val, inline=False)
 
     # if contest list is not empty
-    for i in coming_forces:
-        name = i[0]
-        start_time = i[1]
-        embed.add_field(name=name, value=start_time, inline=False)
+    else:
+        for i in coming_forces:
+            name = i[0]
+            start_time = i[1]
+            embed.add_field(name=name, value=start_time, inline=False)
 
     await channel_code.send(embed=embed)
 
 
 # background task that runs every 24 hours
 @tasks.loop(hours=24)
-async def getlist_codechef():
+async def getlist():
 
     # creating 2 datetime objects, current time and 24 hrs later
     now = dtime.now()

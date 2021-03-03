@@ -31,6 +31,7 @@ def create_table(conn, create_table_sql):
         c = conn.cursor()
         c.execute(create_table_sql)
     except Error as e:
+        conn.rollback()
         print(e)
 
 
@@ -38,8 +39,13 @@ def create_table(conn, create_table_sql):
 def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
+    cursor.execute('DELETE FROM present_contests')
     for items in present_contests:
-        cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+        try:
+            cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+        except Error as e:
+            conn.rollback()
+            print(e)
 
     conn.commit()
 
@@ -141,8 +147,9 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
     except Error as e:
+        conn.rollback()
         print(e)
 
     create_table_present = '''CREATE TABLE Present_Contests(
