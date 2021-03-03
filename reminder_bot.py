@@ -6,12 +6,11 @@ from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
-import time
 
 #setting up connections to both the databases
-conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=port user=postgres password= pass")
-conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=port user=postgres password=pass")
-conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=port user=postgres password= pass")
+conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
+conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
+conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=wglidataiwmi")
 
 #switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds = True, reactions = True, members = True, presences = True)
@@ -69,10 +68,10 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut='Present'
     
-    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=port user=postgres password= pass")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
     c_command = conn_command.cursor()
 
-    contests = []
+
     c_command.execute(f"SELECT * FROM {pre_or_fut}_Contests ORDER BY START")
     sorted_contests = c_command.fetchall()
 
@@ -111,11 +110,11 @@ async def codechef(ctx, pre_or_fut='Present'):
 #this command gives all the impending or ongoing contest on codeforces listed on the website
 @client.command()
 async def codeforces(ctx):
-    # await ctx.send(pre_or_fut)
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=port user=postgres password=pass")
+
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=wglidataiwmi")
     c_command = conn_command.cursor()
 
-    contests = []
+
     c_command.execute("SELECT * FROM Present_Contests ORDER BY START")
     sorted_contests = c_command.fetchall()
 
@@ -179,10 +178,11 @@ async def on_reminder(coming, coming_forces, channel):
         embed.add_field(name = name, value = val, inline=False)
 
     #if contest list is not empty
-    for i in coming_forces:
-        name = i[0]
-        start_time = i[1]
-        embed.add_field(name = name, value= start_time, inline=False)
+    else:
+        for i in coming_forces:
+            name = i[0]
+            start_time = i[1]
+            embed.add_field(name = name, value= start_time, inline=False)
 
     await channel_code.send(embed=embed)
 
@@ -201,7 +201,7 @@ async def getlist_codechef():
     c_forces = conn_forces.cursor()
 
     #server list of client
-    a=client.guilds
+    a = client.guilds
     cursor_info = conn_info.cursor()
 
     #take each contest in Present Contests table of codechef and each contest in the codeforces table
@@ -222,7 +222,7 @@ async def getlist_codechef():
     #check which codeforces contest start in next 24 hours
     for event in sorted_events_forces:
         print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))
-        if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S')<bracket:
+        if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S') < bracket:
             upcoming_forces.append(event)
         else:
             pass
@@ -231,7 +231,7 @@ async def getlist_codechef():
         for i in a:
             #check which channel has been mapped to which server
             guild_id = str(i.id)
-            cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD =%s",(guild_id,) )
+            cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD =%s",(guild_id,))
             guild = cursor_info.fetchone()
 
             #if a channel is not found, it means it has not been set up
@@ -242,7 +242,8 @@ async def getlist_codechef():
             elif guild!=None:
                 client.dispatch("reminder", upcoming, upcoming_forces, int(guild[0]))
             conn_info.commit()
-    except:
+    except Error as e:
+        print(e)
         conn_info.rollback()
 
     print(upcoming, '\n', upcoming_forces)
@@ -250,4 +251,4 @@ async def getlist_codechef():
     conn.commit()
     conn_forces.commit()
 
-client.run('INSERT TOKEN')
+client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q.sAIwzAHw86vNqzmgkDip0Wh4J9U')
