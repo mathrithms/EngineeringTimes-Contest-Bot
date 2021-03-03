@@ -20,7 +20,7 @@ client = commands.Bot(command_prefix='!', intents=intents)
 # start the task when bot goes online
 @client.event
 async def on_ready():
-    getlist_codechef.start()
+    getlist.start()
     print('hey')
 
 
@@ -191,7 +191,7 @@ async def on_reminder(coming, coming_forces, channel):
 
 # background task that runs every 24 hours
 @tasks.loop(hours=24)
-async def getlist_codechef():
+async def getlist():
 
     # creating 2 datetime objects, current time and 24 hrs later
     now = dtime.now()
