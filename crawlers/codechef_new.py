@@ -37,6 +37,7 @@ def create_table(conn, create_table_sql):
 def insert_future_data(conn, future_contests):
 
     cursor = conn.cursor()
+    cursor.execute('DELETE FROM future_contests')
     for items in future_contests:
         try:
             cursor.execute('INSERT INTO future_contests VALUES (%s,%s,%s,%s,%s,0)', items)
@@ -53,6 +54,7 @@ def insert_future_data(conn, future_contests):
 def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
+    # cursor.execute('DELETE FROM present_contests')
     for items in present_contests:
         try:
             cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
