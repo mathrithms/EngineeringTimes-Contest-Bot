@@ -39,7 +39,11 @@ def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
     for items in present_contests:
-        cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+        try:
+            cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+        except Error as e:
+            print(e)
+            continue
 
     conn.commit()
 

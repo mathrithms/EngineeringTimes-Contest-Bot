@@ -180,10 +180,11 @@ async def on_reminder(coming, coming_forces, channel):
         embed.add_field(name=name, value=val, inline=False)
 
     # if contest list is not empty
-    for i in coming_forces:
-        name = i[0]
-        start_time = i[1]
-        embed.add_field(name=name, value=start_time, inline=False)
+    else:
+        for i in coming_forces:
+            name = i[0]
+            start_time = i[1]
+            embed.add_field(name=name, value=start_time, inline=False)
 
     await channel_code.send(embed=embed)
 

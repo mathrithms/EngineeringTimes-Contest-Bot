@@ -37,33 +37,33 @@ def create_table(conn, create_table_sql):
 def insert_future_data(conn, future_contests):
 
     cursor = conn.cursor()
-    try:
-        for items in future_contests:
+    for items in future_contests:
+        try:
             cursor.execute('INSERT INTO future_contests VALUES (%s,%s,%s,%s,%s,0)', items)
+        except Error as e:
+            print(e)
+            continue
 
-        conn.commit()
+    conn.commit()
 
-        cursor.execute('DELETE FROM future_contests WHERE endTime < timestamp("now", "localtime")')
-        conn.commit()
-    except Error as e:
-        print(e)
-        conn.rollback()
+    cursor.execute('DELETE FROM future_contests WHERE endTime < NOW()')
+    conn.commit()
 
 
 def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
-    try:
-        for items in present_contests:
+    for items in present_contests:
+        try:
             cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,%s,0)', items)
-        conn.commit()
+        except Error as e:
+            print(e)
+            continue
+    conn.commit()
 
-        # Delete record if the contest has ended.
-        cursor.execute('DELETE FROM present_contests WHERE endTime < timestamp("now", "localtime")')
-        conn.commit()
-    except Error as e:
-        print(e)
-        conn.rollback()
+    # Delete record if the contest has ended.
+    cursor.execute('DELETE FROM present_contests WHERE endTime < NOW()')
+    conn.commit()
 
 
 # PRESENT CONTESTS
