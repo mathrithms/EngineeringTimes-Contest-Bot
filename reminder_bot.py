@@ -25,6 +25,7 @@ async def on_ready():
 
 
 @client.command()
+@commands.has_permissions(manage_messages=True)
 async def setup(ctx):
     cursor_info = conn_info.cursor()
     channel = ctx.channel
@@ -48,18 +49,6 @@ async def setup(ctx):
     # save changes and close connection
     conn_info.commit()
     cursor_info.close()
-
-
-# handling errors in setup command
-@setup.error
-async def setup_error(ctx, error):
-    # if no channel is given
-    if isinstance(error, commands.ChannelNotFound):
-        await ctx.send('Pass a channel ID, this is INVALID')
-
-    # if invalid channel is given
-    elif isinstance(error, commands.ChannelNotFound):
-        await ctx.send('Pass a valid channel ID, this is invalid')
 
 
 # command gives the list of present or future contests on codechef
