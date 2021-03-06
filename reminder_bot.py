@@ -8,9 +8,9 @@ import datetime
 from datetime import datetime as dtime
 
 # setting up connections to both the databases
-conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
 conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
-conn_info = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=pass")
 
 # switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
@@ -25,6 +25,7 @@ async def on_ready():
 
 
 @client.command()
+@commands.has_permissions(manage_messages=True)
 async def setup(ctx):
     cursor_info = conn_info.cursor()
     channel = ctx.channel
@@ -50,18 +51,6 @@ async def setup(ctx):
     cursor_info.close()
 
 
-# handling errors in setup command
-@setup.error
-async def setup_error(ctx, error):
-    # if no channel is given
-    if isinstance(error, commands.ChannelNotFound):
-        await ctx.send('Pass a channel ID, this is INVALID')
-
-    # if invalid channel is given
-    elif isinstance(error, commands.ChannelNotFound):
-        await ctx.send('Pass a valid channel ID, this is invalid')
-
-
 # command gives the list of present or future contests on codechef
 @client.command()
 async def codechef(ctx, pre_or_fut='Present'):
@@ -70,7 +59,7 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut = 'Present'
 
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -253,4 +242,4 @@ async def getlist():
     conn.commit()
     conn_forces.commit()
 
-client.run('INSERT TOKEN')
+client.run('TOKEN')
