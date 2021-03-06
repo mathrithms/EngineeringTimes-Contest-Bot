@@ -8,9 +8,9 @@ import datetime
 from datetime import datetime as dtime
 
 # setting up connections to both the databases
-conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
-conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
-conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=Samarth@1729")
+conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
+conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=pass")
 
 # switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
@@ -59,7 +59,7 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut = 'Present'
 
-    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -102,7 +102,7 @@ async def codechef(ctx, pre_or_fut='Present'):
 @client.command()
 async def codeforces(ctx):
     # await ctx.send(pre_or_fut)
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
