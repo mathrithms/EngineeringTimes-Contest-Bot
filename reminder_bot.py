@@ -8,9 +8,9 @@ import datetime
 from datetime import datetime as dtime
 
 # setting up connections to both the databases
-conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
-conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
-conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=pass")
+conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
+conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=Samarth@1729")
 
 # switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
@@ -59,7 +59,7 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut = 'Present'
 
-    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -102,7 +102,7 @@ async def codechef(ctx, pre_or_fut='Present'):
 @client.command()
 async def codeforces(ctx):
     # await ctx.send(pre_or_fut)
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
     c_command = conn_command.cursor()
 
     # contests = []
@@ -199,6 +199,8 @@ async def getlist():
     # sort them according to start time and put them in lists
     c.execute("""SELECT * FROM Present_Contests ORDER BY START""")
     sorted_events = c.fetchall()
+    c.execute("""SELECT * FROM Future_Contests ORDER BY START""")
+    sorted_events_future = c.fetchall()
     c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
     print(sorted_events_forces)
@@ -209,6 +211,13 @@ async def getlist():
     # store all ongoing codechef contests in this list
     for event in sorted_events:
         upcoming.append(event)
+
+    for event in sorted_events_future:
+        print(dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S'))
+        if dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S') < bracket:
+            upcoming.append(event)
+        else:
+            pass
 
     # check which codeforces contest start in next 24 hours
     for event in sorted_events_forces:
@@ -242,4 +251,4 @@ async def getlist():
     conn.commit()
     conn_forces.commit()
 
-client.run('TOKEN')
+client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q.0v_Q0rAhxmwToiiIwXXoJrukIys')

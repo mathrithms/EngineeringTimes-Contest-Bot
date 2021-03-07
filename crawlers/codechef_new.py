@@ -237,7 +237,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
+        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=Samarth@1729")
 
     except Error as e:
         conn.rollback()
