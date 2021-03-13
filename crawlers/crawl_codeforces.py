@@ -89,7 +89,7 @@ def extract_present_data():
 
     for start in range(1, rowsize):
         i = startTime[start-1]
-        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[13:17] + ':00'
+        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[12:17] + ':00'
         datetime_object = datetime.strptime(j, '%Y-%b-%d %H:%M:%S')
         startTime[start-1] = datetime_object
 

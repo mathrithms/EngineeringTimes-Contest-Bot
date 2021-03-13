@@ -9,8 +9,8 @@ from datetime import datetime as dtime
 
 # setting up connections to both the databases
 conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
-conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
-conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432 user=postgres password=pass")
+conn_forces = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432  user=postgres password=pass")
+conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=5432  user=postgres password=pass")
 
 # switching on intents and defining the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
@@ -59,39 +59,59 @@ async def codechef(ctx, pre_or_fut='Present'):
     if pre_or_fut not in ['Present', 'Future']:
         pre_or_fut = 'Present'
 
-    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
+    conn_command = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432  user=postgres password=pass")
     c_command = conn_command.cursor()
+
+    today_date = datetime.date.today()
+    tom_delta = datetime.timedelta(hours=24)
+    tom_date = today_date + tom_delta
 
     # contests = []
     c_command.execute(f"SELECT * FROM {pre_or_fut}_Contests ORDER BY START")
     sorted_contests = c_command.fetchall()
 
+    def dtime_conv(date_time):
+        date_time = date_time[2][:11]+" "+date_time[2][12:]
+        date_time = dtime.strptime(date_time, '%d %b %Y %H:%M:%S')
+        return date_time
+
+    sorted_contests = sorted(sorted_contests, key=dtime_conv)
+
     # in case of no contests
     if len(sorted_contests) == 0:
-        await ctx.send("No Contests")
+        await ctx.send("No Contests Available")
         return
 
     # if contest list is not empty
     embed = discord.Embed(
-        title=f'!{pre_or_fut} Contests On Codechef!',
+        title=f'__**{pre_or_fut} Contests**__',
         description='',
         colour=discord.Colour.green()
     )
-    embed.set_author(name='Visit the website <HERE> for more info', url='https://www.codechef.com/')
+    embed.set_author(name='Codechef', icon_url='https://static.dribbble.com/users/70628/screenshots/1743345/codechef.png')
 
-    # if present contests are requested
-    if pre_or_fut == 'Present':
-        for i in sorted_contests:
-            name = i[1]
-            end_time = i[3][:11] + ' ' + i[3][13:]
-            embed.add_field(name=name, value=f'Ends on: {end_time}', inline=False)
+    for i in sorted_contests:
+        start = i[2][:11]
+        if (dtime.strptime(start, "%d %b %Y").date() == today_date):
+            start = 'Today      '
+        elif (dtime.strptime(start, "%d %b %Y").date() == tom_date):
+            start = 'Tomorrow   '
+        s_time = i[2][13:]
+        if (s_time[1] == ':'):
+            s_time = '0' + s_time
 
-    # if future contests are requested
-    else:
-        for i in sorted_contests:
-            name = i[1]
-            start_time = i[2]
-            embed.add_field(name=name, value=f'Starts on: {start_time}', inline=False)
+        end = i[3][:11]
+        if (dtime.strptime(end, "%d %b %Y").date() == today_date):
+            end = 'Today'
+        elif (dtime.strptime(end, "%d %b %Y").date() == tom_date):
+            end = 'Tomorrow'
+        e_time = i[2][13:]
+        if (e_time[1] == ':'):
+            e_time = '0' + e_time
+
+        name = '__'+'***'+i[1]+'***'+'__'
+        time = '```'+'Start time'+'  |  '+'End time'+'\n'+start+' |  '+end+'\n'+s_time+'    |  '+e_time+'```'
+        embed.add_field(name=name, value=time, inline=False)
 
     # send embed and close connection
     await ctx.send(embed=embed)
@@ -102,29 +122,64 @@ async def codechef(ctx, pre_or_fut='Present'):
 @client.command()
 async def codeforces(ctx):
     # await ctx.send(pre_or_fut)
-    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+    conn_command = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432  user=postgres password=pass")
     c_command = conn_command.cursor()
 
     # contests = []
     c_command.execute("SELECT * FROM Present_Contests ORDER BY START")
     sorted_contests = c_command.fetchall()
 
+    today_date = datetime.date.today()
+    tom_delta = datetime.timedelta(hours=24)
+    tom_date = today_date + tom_delta
+
     # if there are no contests
     if len(sorted_contests) == 0:
-        await ctx.send("No Contests")
+        await ctx.send("No Codeforces Contests Available")
         return
 
     embed = discord.Embed(
-        title='!Upcoming Contests On Codeforces!',
+        title='__**Upcoming contests**__',
         description='',
         colour=discord.Colour.green()
     )
-    embed.set_author(name='Visit the website <HERE> for more info', url='https://www.codeforces.com/')
+    embed.set_author(name='Codeforces',
+                     icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
 
     # display starttime and end time of each contest in the embed
     for i in sorted_contests:
-        name = i[0]
-        time = 'Start time: ' + i[1] + '\nEnds at: ' + i[3]
+        start = i[1]
+        s_time = i[1][11:]
+
+        if (s_time[1] == ':'):
+            s_time = '0' + s_time
+
+        start = dtime.strptime(start, "%Y-%m-%d %H:%M:%S")
+        start = start.strftime("%d %b %Y %H:%M:%S")
+        s_date = start[:11]
+
+        if (dtime.strptime(s_date, "%d %b %Y").date() == today_date):
+            s_date = 'Today      '
+        elif (dtime.strptime(s_date, "%d %b %Y").date() == tom_date):
+            s_date = 'Tomorrow   '
+
+        end = i[3]
+        e_time = i[3][11:]
+
+        if (e_time[1] == ':'):
+            e_time = '0' + e_time
+
+        end = dtime.strptime(end, "%Y-%m-%d %H:%M:%S")
+        end = end.strftime("%d %b %Y %H:%M:%S")
+        e_date = start[:11]
+
+        if (dtime.strptime(e_date, "%d %b %Y").date() == today_date):
+            e_date = 'Today'
+        elif (dtime.strptime(e_date, "%d %b %Y").date() == tom_date):
+            e_date = 'Tomorrow'
+
+        name = '__'+'***'+i[0]+'***'+'__'
+        time = '```'+'Start time'+'  |  '+'Ends at'+'\n'+s_date+' |  '+e_date+'\n'+s_time+'    |  '+e_time+'```'
         embed.add_field(name=name, value=time, inline=False)
 
     # send embed and close connection
@@ -134,46 +189,124 @@ async def codeforces(ctx):
 
 # custom event that is triggered every 24 hrs from the task
 @client.event
-async def on_reminder(coming, coming_forces, channel):
+async def on_reminder1(coming, channel):
     channel_code = client.get_channel(channel)
 
-    # in case of no ongoing codechef contests i.e. Present Contest table is empty
+    today_date = datetime.date.today()
+    tom_delta = datetime.timedelta(hours=24)
+    tom_date = today_date + tom_delta
+
+    # sorting the contests according to starttime
+    def dtime_conv(date_time):
+        date_time = date_time[2][:11] + " " + date_time[2][12:]
+        date_time = dtime.strptime(date_time, '%d %b %Y %H:%M:%S')
+        return date_time
+
+    coming = sorted(coming, key=dtime_conv)
 
     embed = discord.Embed(
-        title='!Present Contests!',
+        title='__**Contest Reminder**__',
         description='',
         colour=discord.Colour.green()
     )
+    embed.set_author(name='Codechef', icon_url='https://static.dribbble.com/users/70628/screenshots/1743345/codechef.png')
 
-    # codechef
-    embed.add_field(name='\nCODECHEF', value='Here is the list of ongoing codechef contests', inline=False)
+    # setting header
+    # n1='__'+'***'+'CODECHEF'+'***'+'__'
+    embed.add_field(name=f'{today_date.strftime("%d %B %Y")}',
+                    value='__***Ongoing & Upcoming Codechef Contests***__', inline=False)
 
     # no contests
     if len(coming) == 0:
-        name = "No Upcoming Contests"
+        name = "__***No Upcoming or Ongoing Codechef Contests***__"
         val = None
         embed.add_field(name=name, value=val, inline=False)
 
     # if contest list is not empty
     else:
         for i in coming:
-            name = i[1]
-            start_time = i[2]
-            embed.add_field(name=name, value=start_time, inline=False)
+            start = i[2][:11]
+            if (dtime.strptime(start, "%d %b %Y").date() == datetime.date.today()):
+                start = 'Today      '
+            elif (dtime.strptime(start, "%d %b %Y").date() == tom_date):
+                start = 'Tomorrow   '
+            s_time = i[2][13:]
+            if (s_time[1] == ':'):
+                s_time = '0' + s_time
+
+            end = i[3][:11]
+            if (dtime.strptime(end, "%d %b %Y").date() == datetime.date.today()):
+                end = 'Today'
+            elif (dtime.strptime(end, "%d %b %Y").date() == tom_date):
+                end = 'Tomorrow   '
+            e_time = i[3][12:]
+            if (e_time[1] == ':'):
+                e_time = '0' + e_time
+
+            name = '__***'+i[1]+'***__'
+            time1 = '```'+'Start time'+'  |  '+'End time'+'\n'+start+' |  '+end+'\n'+s_time+'    |  '+e_time+'```'
+            embed.add_field(name=name, value=time1, inline=False)
+
+    await channel_code.send(embed=embed)
+
+
+@client.event
+async def on_reminder2(coming_forces, channel):
+    channel_code = client.get_channel(channel)
+
+    today_date = datetime.date.today()
+    tom_delta = datetime.timedelta(hours=24)
+    tom_date = today_date + tom_delta
+
+    embed = discord.Embed(
+        title='__**Contests Reminder**__',
+        description='',
+        colour=discord.Colour.red()
+    )
+
+    embed.set_author(name='Codeforces',
+                     icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
 
     # codeforces
-    embed.add_field(name='\nCODEFORCES', value='Here is the list of upcoming codeforces contests', inline=False)
+    # n2='__***CODEFORCES***__'
+    embed.add_field(name=f'{today_date.strftime("%d %B %Y")}', value='__***Upcoming Codeforces Contests***__', inline=False)
     if len(coming_forces) == 0:
-        name = "No Upcoming Contests"
-        val = None
+        name = "__***No Upcoming Contests***__"
+        val = "No Contest Scheduled Today"
         embed.add_field(name=name, value=val, inline=False)
 
     # if contest list is not empty
     else:
         for i in coming_forces:
-            name = i[0]
-            start_time = i[1]
-            embed.add_field(name=name, value=start_time, inline=False)
+            start = i[1]
+            s_time = i[1][11:]
+            if (s_time[1] == ':'):
+                s_time = '0' + s_time
+            start = dtime.strptime(start, "%Y-%m-%d %H:%M:%S")
+            start = start.strftime("%d %b %Y %H:%M:%S")
+            s_date = start[:11]
+
+            if (dtime.strptime(s_date, "%d %b %Y").date() == datetime.date.today()):
+                s_date = 'Today      '
+            elif (dtime.strptime(s_date, "%d %b %Y").date() == tom_date):
+                s_date = 'Tomorrow   '
+
+            end = i[3]
+            e_time = i[3][11:]
+            if (e_time[1] == ':'):
+                e_time = '0' + e_time
+            end = dtime.strptime(end, "%Y-%m-%d %H:%M:%S")
+            end = end.strftime("%d %b %Y %H:%M:%S")
+            e_date = end[:11]
+
+            if (dtime.strptime(e_date, "%d %b %Y").date() == datetime.date.today()):
+                e_date = 'Today'
+            elif (dtime.strptime(e_date, "%d %b %Y").date() == tom_date):
+                e_date = 'Tomorrow'
+
+            name = '__***'+i[0]+'***__'
+            time2 = '```'+'Start time'+'  |  '+'Ends at'+'\n'+s_date+' |  '+e_date+'\n'+s_time+'    |  '+e_time+'```'
+            embed.add_field(name=name, value=time2, inline=False)
 
     await channel_code.send(embed=embed)
 
@@ -240,7 +373,8 @@ async def getlist():
 
             # if found, send embed
             elif guild is not None:
-                client.dispatch("reminder", upcoming, upcoming_forces, int(guild[0]))
+                client.dispatch("reminder1", upcoming, int(guild[0]))
+                client.dispatch("reminder2", upcoming_forces, int(guild[0]))
             conn_info.commit()
     except Error as e:
         print(e)
@@ -250,5 +384,4 @@ async def getlist():
 
     conn.commit()
     conn_forces.commit()
-
-client.run('TOKEN')
+client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q._CbPwhSD0EBdffW47EpiLAxPKDI')
