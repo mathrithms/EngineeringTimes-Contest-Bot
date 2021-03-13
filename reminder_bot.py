@@ -384,4 +384,4 @@ async def getlist():
 
     conn.commit()
     conn_forces.commit()
-client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q._CbPwhSD0EBdffW47EpiLAxPKDI')
+client.run('TOKEN')
