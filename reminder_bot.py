@@ -96,7 +96,7 @@ async def codechef(ctx, pre_or_fut='Present'):
             start = 'Today      '
         elif (dtime.strptime(start, "%d %b %Y").date() == tom_date):
             start = 'Tomorrow   '
-        s_time = i[2][13:]
+        s_time = i[2][12:]
         if (s_time[1] == ':'):
             s_time = '0' + s_time
 
@@ -105,7 +105,7 @@ async def codechef(ctx, pre_or_fut='Present'):
             end = 'Today'
         elif (dtime.strptime(end, "%d %b %Y").date() == tom_date):
             end = 'Tomorrow'
-        e_time = i[2][13:]
+        e_time = i[3][12:]
         if (e_time[1] == ':'):
             e_time = '0' + e_time
 
@@ -225,12 +225,13 @@ async def on_reminder1(coming, channel):
     # if contest list is not empty
     else:
         for i in coming:
+            print(i)
             start = i[2][:11]
             if (dtime.strptime(start, "%d %b %Y").date() == datetime.date.today()):
                 start = 'Today      '
             elif (dtime.strptime(start, "%d %b %Y").date() == tom_date):
                 start = 'Tomorrow   '
-            s_time = i[2][13:]
+            s_time = i[2][12:]
             if (s_time[1] == ':'):
                 s_time = '0' + s_time
 
@@ -384,4 +385,4 @@ async def getlist():
 
     conn.commit()
     conn_forces.commit()
-client.run('TOKEN')
+client.run('ODExNjUxOTg2NDExNzQ5NDQ3.YC1T0Q._snxU0uQ0AtL1yGlFtojFZ3HfjQ')
