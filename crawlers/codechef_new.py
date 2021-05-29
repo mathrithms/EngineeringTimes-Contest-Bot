@@ -9,6 +9,14 @@ from psycopg2 import Error
 
 from datetime import datetime
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+PASS = os.getenv("PASSWORD")
+PORT = os.getenv("PORT")
+DB_NAME_CHEF = os.getenv("DB_NAME_CC")
+
 # web Driver path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
@@ -133,47 +141,47 @@ def extract_present_data():
 def extract_future_data():
 
     WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.XPATH, "//*[@id='primary-content']/div/div[4]/table/tbody/tr"))
+        EC.presence_of_all_elements_located((By.XPATH, "//*[@id='primary-content']/div/div[6]/table/tbody/tr"))
     )
-
-    rows = driver.find_elements_by_xpath("//*[@id='primary-content']/div/div[4]/table/tbody/tr")
+    # //*[@id="primary-content"]/div/div[6]
+    rows = driver.find_elements_by_xpath("//*[@id='primary-content']/div/div[6]/table/tbody/tr")
 
     rowsize = len(rows)
 
     codes = []
     for i in range(0, rowsize):
         WebDriverWait(driver, 10).until(
-         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[1]'))
+         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[1]'))
         )
         codes.append(driver.find_elements_by_xpath(
-            '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[1]')[i].text
+            '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[1]')[i].text
         )
 
     names = []
     for i in range(0, rowsize):
         WebDriverWait(driver, 10).until(
-         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[2]'))
+         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[2]'))
         )
         names.append(driver.find_elements_by_xpath(
-            '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[2]')[i].text
+            '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[2]')[i].text
         )
 
     starts = []
     for i in range(0, rowsize):
         WebDriverWait(driver, 10).until(
-         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[3]'))
+         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[3]'))
         )
         starts.append(driver.find_elements_by_xpath(
-            '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[3]')[i].text
+            '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[3]')[i].text
         )
 
     ends = []
     for i in range(0, rowsize):
         WebDriverWait(driver, 10).until(
-         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[4]'))
+         EC.presence_of_all_elements_located((By.XPATH, '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[4]'))
         )
         ends.append(driver.find_elements_by_xpath(
-            '//*[@id="primary-content"]/div/div[4]/table/tbody/tr["+i+"]/td[4]')[i].text
+            '//*[@id="primary-content"]/div/div[6]/table/tbody/tr["+i+"]/td[4]')[i].text
         )
 
     '''convert the endtime of a contest from "24 Oct 2020 12:30:00" format to "2020-10-24 12:30:00" format '''
@@ -237,7 +245,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codechef_new.db host=localhost port=5432 user=postgres password=pass")
+        conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
 
     except Error as e:
         conn.rollback()
@@ -264,7 +272,7 @@ def main():
     # finds a element with id "menu-309"
     # contests = driver.find_element_by_id("menu-309")
     contests = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "menu-309"))
+        EC.presence_of_element_located((By.XPATH, "//*[@id='menu-309']/a"))
     )
 
     contests.click()

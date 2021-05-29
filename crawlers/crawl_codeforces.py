@@ -10,6 +10,13 @@ from psycopg2 import Error
 from datetime import datetime
 import datetime as dt
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+PASS = os.getenv("PASSWORD")
+PORT = os.getenv("PORT")
+DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
+
 # web Driver path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
@@ -87,6 +94,8 @@ def extract_present_data():
             '//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i-1].text
         )
 
+    print(startTime)
+
     for start in range(1, rowsize):
         i = startTime[start-1]
         j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[12:17] + ':00'
@@ -147,7 +156,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+        conn = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT} user=postgres password={PASS}")
     except Error as e:
         conn.rollback()
         print(e)
