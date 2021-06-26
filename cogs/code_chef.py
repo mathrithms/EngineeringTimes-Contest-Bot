@@ -26,11 +26,14 @@ class Codechef(commands.Cog):
 
     # command gives the list of present or future contests on codechef
     @commands.command()
-    async def codechef(self, ctx, pre_or_fut='Present', type=None):
+    async def codechef(self, ctx, pre_or_fut='Present', all=None):
 
         # check if the user has requested present or future contests
         pre_or_fut = pre_or_fut[0].upper() + pre_or_fut[1:].lower()
-        if pre_or_fut not in ['Present', 'Future']:
+        if pre_or_fut == "All":
+            all = "all"
+            pre_or_fut = 'Present'
+        elif pre_or_fut not in ['Present', 'Future', "All"]:
             pre_or_fut = 'Present'
 
         conn_command = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT}  user=postgres password={PASS}")
@@ -45,27 +48,31 @@ class Codechef(commands.Cog):
         c_command.execute(f"SELECT * FROM {pre_or_fut}_Contests ORDER BY START")
         sorted_contests = c_command.fetchall()
 
-        # check for extra arguments i.e. check if any specific type of contest is requested
-        types = {'lt': 'lunchtime', 'lc': 'longchallenge', 'cf': 'cook-off'}
-        if type is not None:
-            if type not in types.keys():
-                pass
-            else:
-                given_type = types[type]
-                sorted_contests = [i for i in sorted_contests if given_type in i[1].lower()]
-
         # function to convert all datetimes to dd mmm yyyy hh:mm:ss' format
         def dtime_conv(date_time):
-            date_time = date_time[2][:11] + " "+ date_time[2][12:]
+            date_time = date_time[2][:11] + " " + date_time[2][12:]
             date_time = dtime.strptime(date_time, '%d %b %Y %H:%M:%S')
             return date_time
 
         # sort contests according to startime
         sorted_contests = sorted(sorted_contests, key=dtime_conv)
 
+        threshold = datetime.timedelta(days=30)
+        all_sorted_contests = sorted_contests
+        relevant_contests = []
+
+        for contest in sorted_contests:
+            time_s = dtime_conv(contest)
+            time_e = contest[4]
+            if (time_e - time_s) < threshold:
+                relevant_contests.append(contest)
+
+        if (all == "all"):
+            relevant_contests = sorted_contests
+
         # in case of no contests available, a message is sent and the function returns
-        if len(sorted_contests) == 0:
-            await ctx.send("No Contests Available :slight_smile:")
+        if len(relevant_contests) == 0:
+            await ctx.send("No Contests Available :slight_smile:. Check for longer contests by calling `!codechef all`")
             return
 
         # if contest list is not empty, an embed object is made
@@ -79,7 +86,7 @@ class Codechef(commands.Cog):
         # customizing embed format.
         # here, we check if any of the start or end dates are 'today' or 'tomorrow'. If yes, they are
         # replaced by today or tomorrow for better readability
-        for i in sorted_contests:
+        for i in relevant_contests:
             start = i[2][:11]
             if (dtime.strptime(start, "%d %b %Y").date() == today_date):
                 start = 'Today      '

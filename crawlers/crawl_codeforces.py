@@ -24,8 +24,7 @@ chrome_options = Options()
 chrome_options.headless = True
 chrome_options.binary_location = r"C:\\Program Files (x86)\\Google\Chrome\\Application\\chrome.exe"
 
-driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options)
-
+driver = webdriver.Chrome(executable_path=PATH, options=chrome_options)
 
 # url to crawl
 url = 'https://codeforces.com/'
@@ -49,7 +48,7 @@ def insert_present_data(conn, present_contests):
     cursor.execute('DELETE FROM present_contests')
     for items in present_contests:
         try:
-            cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+            cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,0)', items)
         except Error as e:
             conn.rollback()
             print(e)
@@ -135,12 +134,12 @@ def extract_present_data():
 def get_present_data(conn):
 
     cursor = conn.cursor()
-    cursor.execute('SELECT name,start,duration FROM Present_Contests WHERE is_added = 0')
+    cursor.execute('SELECT name,start,duration FROM present_contests WHERE is_added = 0')
     list_p = cursor.fetchall()
     for item in list_p:
         list_present.append(item)
 
-    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
+    cursor.execute('UPDATE present_contests SET is_added = 1 ')
     conn.commit()
 
 
@@ -162,7 +161,7 @@ def main():
         print(e)
 
     create_table_present = '''CREATE TABLE Present_Contests(
-                    NAME text UNIQUE,
+                    NAME text,
                     START text, DURATION text, ENDt text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 

@@ -1,7 +1,9 @@
 import discord
 import os
 from discord.ext import commands, tasks
-  
+
+
+# setting up ENV variables
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -12,22 +14,29 @@ DB_NAME_CHEF = os.getenv("DB_NAME_CC")
 DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
 DB_NAME_GUILDS = os.getenv("DB_NAME_GUILDS")
 
-# importing database manager
+
+# importing database manager and datetime modules
 import psycopg2
 from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
 
+
+# initializing the bot
 intents = discord.Intents(messages=True, guilds=True, reactions=True, members=True, presences=True)
 client = commands.Bot(command_prefix='!', intents=intents, help_command=None)
+
 
 # setting up connections to both the databases
 conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
 conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
 conn_info = psycopg2.connect(f"dbname={DB_NAME_GUILDS} host=localhost port={PORT} user=postgres password={PASS}")
+#conn_forces=psycopg2.connect(dbname="db_git2", host="localhost", port="9821", user="postgres", password="")
+#conn = psycopg2.connect(dbname="db_git", host="localhost", port="9821", user="postgres", password="")
+#conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=9821 user=postgres password= ")
 
-# load all the commands when bot goes online
+# loading all the commands when bot goes online
 @client.command()
 async def load(ctx, extension):
     client.load_extension(f"cogs.{extension}")
@@ -37,7 +46,7 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
 
-# start the tasks when bot goes online
+# start the tasks loop when bot goes online
 @client.event
 async def on_ready():
     getlist.start()
@@ -105,7 +114,7 @@ async def on_reminder_chef(coming,channel):
                 e_time = '0' + e_time
 
             name = '__***'+i[1]+'***__'
-            time1= '```'+'Start time'+'  |  '+'End time'+'\n'+start +' |  '+ end +'\n'+ s_time +'    |  '+ e_time +'```'
+            time1='[Go to the contest page]({})'.format(i[6])+'\n'+'```'+'Start time'+'  |  '+'End time'+'\n'+start +' |  '+ end +'\n'+ s_time +'    |  '+ e_time +'```' 
             embed.add_field(name=name, value=time1, inline=False)
 
    
@@ -117,6 +126,7 @@ async def on_reminder_forces(coming_forces, channel):
 
     # get the channel ID from the string passed
     channel_code = client.get_channel(channel)
+
 
     # get today and tomorrows dates
     today_date = datetime.date.today()
@@ -187,13 +197,14 @@ async def getlist():
     delta = datetime.timedelta(hours=24)
     bracket = now + delta
 
-    # setting up connections
-    c = conn.cursor()
-    c_forces = conn_forces.cursor()
+    # setting up cursors
+    c = conn.cursor()                    # cursor of codechef database
+    c_forces = conn_forces.cursor()      # cursor of codeforces database
 
     # getting server list of the bot
     server_list = client.guilds
-    cursor_info = conn_info.cursor()
+    cursor_info = conn_info.cursor()     # cursor of server ID database
+
 
     # takes each contest in Present Contests table of codechef and each contest in the codeforces table
     # sort them according to start time and put them in lists
@@ -203,26 +214,29 @@ async def getlist():
     sorted_events_future = c.fetchall()
     c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
-    print(sorted_events_forces)
 
-    upcoming_chef = []    # stores all ongoing codechef contest
+
+    upcoming_chef = []      # stores all ongoing codechef contest
     upcoming_forces = []    # stores all codeforces contests that start in the next 24 hours from now
+
 
     # store all ongoing codechef contests in this list
     for event in sorted_events_present:
         upcoming_chef.append(event)
 
+
     # checking if any future codechef events start within 24 hrs
     for event in sorted_events_future:
-        print(dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S'))   # REMOVE THIS LINE
+        print(dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S'))   # prints the codechef contest starttime CAN BE REMOVED
         if dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S') < bracket:
             upcoming_chef.append(event)
         else:
             pass
 
+
     # check which codeforces contest start in next 24 hours
     for event in sorted_events_forces:
-        print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))
+        # print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))    # prints the codeforces contest starttime CAN BE REMOVED
         if dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S') < bracket:
             upcoming_forces.append(event)
         else:
@@ -247,8 +261,6 @@ async def getlist():
     except Error as e:
         print(e)
         conn_info.rollback()
-
-    print(upcoming_chef, '\n', upcoming_forces)
 
     conn.commit()
     conn_forces.commit()
