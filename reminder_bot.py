@@ -234,14 +234,6 @@ async def getlist():
         else:
             pass
 
-
-    for event in sorted_events_future:
-        print(dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S'))
-        if dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S') < bracket:
-            upcoming.append(event)
-        else:
-            pass
-
     # check which codeforces contest start in next 24 hours
     for event in sorted_events_forces:
         # print(dtime.strptime(event[1], '%Y-%m-%d %H:%M:%S'))    # prints the codeforces contest starttime CAN BE REMOVED
