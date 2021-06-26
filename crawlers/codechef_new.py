@@ -222,7 +222,7 @@ def extract_future_data():
 def get_present_data(conn):
 
     cursor = conn.cursor()
-    cursor.execute('SELECT code,name,start,endt FROM present_contests WHERE is_added = 0, links')
+    cursor.execute('SELECT code,name,start,endt FROM present_contests WHERE is_added = 0')
     list_p = cursor.fetchall()
     for item in list_p:
         list_present.append(item)
@@ -235,7 +235,7 @@ def get_present_data(conn):
 def get_future_data(conn):
 
     cursor = conn.cursor()
-    cursor.execute('SELECT code,name,start,endt FROM future_contests WHERE is_added = 0,links')
+    cursor.execute('SELECT code,name,start,endt FROM future_contests WHERE is_added = 0')
     list_f = cursor.fetchall()
     for item in list_f:
         list_future.append(item)
