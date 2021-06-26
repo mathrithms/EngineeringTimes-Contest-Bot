@@ -4,7 +4,7 @@ import os
 from discord.ext import commands, tasks
 from discord.message import Message
 import asyncio
-from main import client
+from reminder_bot import client
 
 # importing database manager
 import psycopg2
