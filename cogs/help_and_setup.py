@@ -1,22 +1,20 @@
-from cogs.code_chef import PORT
+# from cogs.code_chef import PORT
 import discord
 import os
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 # importing database manager
 import psycopg2
-from psycopg2 import Error
+# import datetime
+# from datetime import datetime as dtime
 
-import datetime
-from datetime import datetime as dtime
-
-import os
 from dotenv import load_dotenv
 load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 
 conn_info = psycopg2.connect(f"dbname=guild_info.db host=localhost port={PORT} user=postgres password={PASS}")
+
 
 class Help(commands.Cog):
     def __init__(self, client):
@@ -27,7 +25,7 @@ class Help(commands.Cog):
     async def setup(self, ctx):
         cursor_info = conn_info.cursor()
         channel = ctx.channel
-        
+
         # getting server ID as string to navigate the database
         server = str(ctx.guild.id)
         cursor_info.execute("SELECT CHANNEL FROM info WHERE GUILD = %s", (server, ))
@@ -53,13 +51,13 @@ class Help(commands.Cog):
     @commands.command()
     async def help(self, ctx):
         embed = discord.Embed(
-            title=f'**Commands**',
+            title='**Commands**',
             description='',
             colour=discord.Colour.dark_blue()
         )
 
         name_set = "**__setup__**: *Command to setup the new bot*"
-        val_set =  "*No Subcommands*"
+        val_set = "*No Subcommands*"
         embed.add_field(name=name_set, value=val_set, inline=False)
 
         name_cc = "**__codechef__**: *Command to give codechef data*"
@@ -70,11 +68,12 @@ class Help(commands.Cog):
         val_cf = "*No Subcommands*"
         embed.add_field(name=name_cf, value=val_cf, inline=False)
 
-        name_ed = "**editorials**: *Command to give codechef editorials*"
+        # name_ed = "**editorials**: *Command to give codechef editorials*"
         val_cf = "*No Subcommands*"
         embed.add_field(name=name_cf, value=val_cf, inline=False)
 
         await ctx.send(embed=embed)
+
 
 def setup(client):
     client.add_cog(Help(client))

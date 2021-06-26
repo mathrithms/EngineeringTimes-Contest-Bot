@@ -1,15 +1,13 @@
 import discord
 import os
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 # importing database manager
 import psycopg2
-from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
 
-import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -19,6 +17,7 @@ PORT = os.getenv("PORT")
 DB_NAME_CHEF = os.getenv("DB_NAME_CC")
 
 conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
+
 
 class Codechef(commands.Cog):
     def __init__(self, client):
@@ -58,7 +57,7 @@ class Codechef(commands.Cog):
         sorted_contests = sorted(sorted_contests, key=dtime_conv)
 
         threshold = datetime.timedelta(days=30)
-        all_sorted_contests = sorted_contests
+        # all_sorted_contests = sorted_contests
         relevant_contests = []
 
         for contest in sorted_contests:
@@ -106,7 +105,7 @@ class Codechef(commands.Cog):
                 e_time = '0' + e_time
 
             name = '__'+'***'+i[1]+'***'+'__'
-            time = '```' + 'Start time' + '  |  ' + 'End time'+'\n' + start + ' |  ' + end +'\n'+ s_time+'    |  '+ e_time +'```'
+            time = '```'+'Start time'+'  |  '+'End time'+'\n'+start+' |  '+end+'\n'+s_time+'    |  '+e_time+'```'
             embed.add_field(name=name, value=time, inline=False)
 
         # send embed and close connection

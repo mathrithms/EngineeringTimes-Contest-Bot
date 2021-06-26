@@ -3,7 +3,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 import psycopg2
 from psycopg2 import Error
 
@@ -107,7 +106,7 @@ def extract_present_data():
         names.append(driver.find_elements_by_xpath(
             '//*[@id="present-contests-data"]/tr["+i+"]/td[2]')[i].text
         )
-    links=[]
+    links = []
     for i in range(0, rowsize):
         element = driver.find_element_by_link_text(names[i])
         ele = element.get_attribute('href')
@@ -134,7 +133,7 @@ def extract_present_data():
         datetime_object = datetime.strptime(i, '%d %b %Y %H:%M:%S')
         endTime.append(datetime_object)
 
-    lists = [codes, names,startTime, ends, endTime,links]
+    lists = [codes, names, startTime, ends, endTime, links]
 
     present_contests = list(zip(*lists))
     # print(present_contests)
@@ -163,7 +162,7 @@ def extract_future_data():
             '//*[@id="future-contests-data"]/tr/td[1]')[i].text
 
         )
-    
+
     names = []
     for i in range(0, rowsize):
         WebDriverWait(driver, 10).until(
@@ -175,7 +174,7 @@ def extract_future_data():
 
         )
 
-    links=[]
+    links = []
     for i in range(0, rowsize):
         element = driver.find_element_by_link_text(names[i])
         ele = element.get_attribute('href')
@@ -212,7 +211,7 @@ def extract_future_data():
 
     driver.quit()
 
-    lists = [codes, names, starts, ends, endTime,links]
+    lists = [codes, names, starts, ends, endTime, links]
 
     future_contests = list(zip(*lists))
 
@@ -272,15 +271,15 @@ def main():
 
     create_table_future = '''CREATE TABLE future_contests(
 
-                    CODE text UNIQUE, NAME text, 
+                    CODE text UNIQUE, NAME text,
 
-                   
+
                     START text, ENDt text, endTime timestamp,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)),link text NOT NULL);'''
 
     create_table_present = '''CREATE TABLE present_contests(
 
-                    CODE text UNIQUE, NAME text, 
+                    CODE text UNIQUE, NAME text,
 
                     START text, ENDt text, endTime timestamp,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)),link text NOT NULL);'''

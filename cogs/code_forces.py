@@ -1,15 +1,13 @@
 import discord
 import os
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 # importing database manager
 import psycopg2
-from psycopg2 import Error
 
 import datetime
 from datetime import datetime as dtime
 
-import os
 from dotenv import load_dotenv
 load_dotenv()
 PASS = os.getenv("PASSWORD")
@@ -18,15 +16,18 @@ DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
 
 conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
 
+
 class Codeforces(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
+
     # command to gives all the impending or ongoing contest on codeforces
     @commands.command()
     async def codeforces(self, ctx):
         # set up connections
-        conn_command = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
+        conn_command = psycopg2.connect(
+                                       f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}"
+                                       )
         c_command = conn_command.cursor()
 
         # select all contest and store in a list
@@ -49,7 +50,8 @@ class Codeforces(commands.Cog):
             description='',
             colour=discord.Colour.green()
         )
-        embed.set_author(name='Codeforces', icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
+        embed.set_author(name='Codeforces',
+                         icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
 
         # display starttime and end time of each contest in the embed
         for i in sorted_contests:
@@ -67,7 +69,6 @@ class Codeforces(commands.Cog):
                 s_date = 'Today      '
             elif (dtime.strptime(s_date, "%d %b %Y").date() == tom_date):
                 s_date = 'Tomorrow   '
-
 
             end = i[3]
             e_time = i[3][11:]
@@ -93,6 +94,5 @@ class Codeforces(commands.Cog):
         conn_command.close()
 
 
-    
 def setup(client):
     client.add_cog(Codeforces(client))

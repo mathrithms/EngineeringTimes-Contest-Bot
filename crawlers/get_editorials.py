@@ -1,5 +1,5 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,6 +8,9 @@ from selenium.common.exceptions import ElementClickInterceptedException
 
 import psycopg2
 from psycopg2 import Error
+
+import os
+from dotenv import load_dotenv
 
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
@@ -19,10 +22,6 @@ driver = webdriver.Chrome(PATH)
 
 driver.get("https://www.codechef.com/contests/?itm_medium=navmenu&itm_campaign=allcontests#past-contests")
 
-
-# environmental variables
-import os
-from dotenv import load_dotenv
 load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
@@ -115,7 +114,7 @@ except Error as e:
 
 create_table_edit = '''CREATE TABLE editorial_info(
                 NAME text UNIQUE,
-                URL text, 
+                URL text,
                 is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
 if conn is not None:

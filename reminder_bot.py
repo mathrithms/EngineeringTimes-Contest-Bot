@@ -1,11 +1,12 @@
 import discord
 import os
 from discord.ext import commands, tasks
-
-
-# setting up ENV variables
-import os
 from dotenv import load_dotenv
+import psycopg2
+from psycopg2 import Error
+import datetime
+from datetime import datetime as dtime
+
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 PASS = os.getenv("PASSWORD")
@@ -13,14 +14,6 @@ PORT = os.getenv("PORT")
 DB_NAME_CHEF = os.getenv("DB_NAME_CC")
 DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
 DB_NAME_GUILDS = os.getenv("DB_NAME_GUILDS")
-
-
-# importing database manager and datetime modules
-import psycopg2
-from psycopg2 import Error
-
-import datetime
-from datetime import datetime as dtime
 
 
 # initializing the bot
@@ -32,11 +25,13 @@ client = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
 conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
 conn_info = psycopg2.connect(f"dbname={DB_NAME_GUILDS} host=localhost port={PORT} user=postgres password={PASS}")
-#conn_forces=psycopg2.connect(dbname="db_git2", host="localhost", port="9821", user="postgres", password="")
-#conn = psycopg2.connect(dbname="db_git", host="localhost", port="9821", user="postgres", password="")
-#conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=9821 user=postgres password= ")
+# conn_forces=psycopg2.connect(dbname="db_git2", host="localhost", port="9821", user="postgres", password="")
+# conn = psycopg2.connect(dbname="db_git", host="localhost", port="9821", user="postgres", password="")
+# conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=9821 user=postgres password= ")
+
 
 # loading all the commands when bot goes online
+
 @client.command()
 async def load(ctx, extension):
     client.load_extension(f"cogs.{extension}")
@@ -55,7 +50,7 @@ async def on_ready():
 
 # custom event that is triggered every 24 hrs and sends all the codechef contest
 @client.event
-async def on_reminder_chef(coming,channel):
+async def on_reminder_chef(coming, channel):
 
     # get the channel ID from the string passed
     channel_code = client.get_channel(channel)
@@ -67,7 +62,7 @@ async def on_reminder_chef(coming,channel):
 
     # function to convert datetimes to dd mmm yyyy hh:mm:ss' format
     def dtime_conv(date_time):
-        date_time = date_time[2][:11] + " "+ date_time[2][12:]
+        date_time = date_time[2][:11] + " " + date_time[2][12:]
         date_time = dtime.strptime(date_time, '%d %b %Y %H:%M:%S')
         return date_time
 
@@ -83,8 +78,8 @@ async def on_reminder_chef(coming,channel):
     embed.set_author(name='Codechef', icon_url='https://static.dribbble.com/users/70628/screenshots/1743345/codechef.png')
 
     # setting header
-    n1='__'+'***'+'CODECHEF'+'***'+'__'   #REMOVE THIS LINE
-    embed.add_field(name=f'{today_date.strftime("%d %B %Y")}', value='__***Ongoing & Upcoming Codechef Contests***__', inline=False)
+    embed.add_field(name=f'{today_date.strftime("%d %B %Y")}',
+                    value='__***Ongoing & Upcoming Codechef Contests***__', inline=False)
 
     # in case of no contests
     if len(coming) == 0:
@@ -113,12 +108,13 @@ async def on_reminder_chef(coming,channel):
             if (e_time[1] == ':'):
                 e_time = '0' + e_time
 
-            name = '__***'+i[1]+'***__'
-            time1='[Go to the contest page]({})'.format(i[6])+'\n'+'```'+'Start time'+'  |  '+'End time'+'\n'+start +' |  '+ end +'\n'+ s_time +'    |  '+ e_time +'```' 
+            name = '__***' + i[1] + '***__'
+            str1 = '```'+'Start time'+'  |  '+'End time'+'\n'
+            time1 = '[Go to the contest page]({})'.format(i[6])+'\n'+str1+start+' |  '+end+'\n'+s_time+'    |  '+e_time+'```'
             embed.add_field(name=name, value=time1, inline=False)
 
-   
     await channel_code.send(embed=embed)
+
 
 # custom event that gets triggered every 24 hrs and sends codechef contests
 @client.event
@@ -126,7 +122,6 @@ async def on_reminder_forces(coming_forces, channel):
 
     # get the channel ID from the string passed
     channel_code = client.get_channel(channel)
-
 
     # get today and tomorrows dates
     today_date = datetime.date.today()
@@ -140,10 +135,10 @@ async def on_reminder_forces(coming_forces, channel):
         colour=discord.Colour.red()
     )
 
-    embed.set_author(name='Codeforces', icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
+    embed.set_author(name='Codeforces',
+                     icon_url='https://carlacastanho.github.io/Material-de-APC/assets/images/codeforces_icon.png')
 
     # setting header
-    n2='__***CODEFORCES***__'
     embed.add_field(name=f'{today_date.strftime("%d %B %Y")}', value='__***Upcoming Codeforces Contests***__', inline=False)
 
     # in case of no contests
@@ -182,7 +177,7 @@ async def on_reminder_forces(coming_forces, channel):
                 e_date = 'Tomorrow'
 
             name = '__***'+i[0]+'***__'
-            time2 = '```'+'Start time'+'  |  '+'Ends at'+'\n'+ s_date +' |  '+ e_date +'\n'+ s_time +'    |  '+ e_time +'```'
+            time2 = '```'+'Start time'+'  |  '+'Ends at'+'\n'+s_date+' |  '+e_date+'\n'+s_time+'    |  '+e_time+'```'
             embed.add_field(name=name, value=time2, inline=False)
 
     await channel_code.send(embed=embed)
@@ -205,26 +200,22 @@ async def getlist():
     server_list = client.guilds
     cursor_info = conn_info.cursor()     # cursor of server ID database
 
-
     # takes each contest in Present Contests table of codechef and each contest in the codeforces table
     # sort them according to start time and put them in lists
     c.execute("""SELECT * FROM Present_Contests ORDER BY START""")
     sorted_events_present = c.fetchall()
-    sorted_events = c.fetchall()
+    # sorted_events = c.fetchall()
     c.execute("""SELECT * FROM Future_Contests ORDER BY START""")
     sorted_events_future = c.fetchall()
     c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
 
-
     upcoming_chef = []      # stores all ongoing codechef contest
     upcoming_forces = []    # stores all codeforces contests that start in the next 24 hours from now
-
 
     # store all ongoing codechef contests in this list
     for event in sorted_events_present:
         upcoming_chef.append(event)
-
 
     # checking if any future codechef events start within 24 hrs
     for event in sorted_events_future:
@@ -255,8 +246,8 @@ async def getlist():
 
             # if found, send embed
             elif guild is not None:
-                client.dispatch("reminder_chef", upcoming_chef,int(guild[0]))
-                client.dispatch("reminder_forces", upcoming_forces,int(guild[0]))
+                client.dispatch("reminder_chef", upcoming_chef, int(guild[0]))
+                client.dispatch("reminder_forces", upcoming_forces, int(guild[0]))
             conn_info.commit()
     except Error as e:
         print(e)
