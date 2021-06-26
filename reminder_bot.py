@@ -210,6 +210,7 @@ async def getlist():
     # sort them according to start time and put them in lists
     c.execute("""SELECT * FROM Present_Contests ORDER BY START""")
     sorted_events_present = c.fetchall()
+    sorted_events = c.fetchall()
     c.execute("""SELECT * FROM Future_Contests ORDER BY START""")
     sorted_events_future = c.fetchall()
     c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
@@ -233,6 +234,13 @@ async def getlist():
         else:
             pass
 
+
+    for event in sorted_events_future:
+        print(dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S'))
+        if dtime.strptime(event[2], '%d %b %Y\n%H:%M:%S') < bracket:
+            upcoming.append(event)
+        else:
+            pass
 
     # check which codeforces contest start in next 24 hours
     for event in sorted_events_forces:
