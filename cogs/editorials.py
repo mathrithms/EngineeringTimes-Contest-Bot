@@ -29,7 +29,7 @@ class Editorials(commands.Cog):
 
         embed_list = []  # list to store embeds with 5 field each.this is done to ensure the chat is not flooded by long embeds
 
-        if editorial_list % 5 == 0:
+        if len(editorial_list) % 5 == 0:
             num_of_pages = len(editorial_list)
         else:
             num_of_pages = len(editorial_list)//5 + 1

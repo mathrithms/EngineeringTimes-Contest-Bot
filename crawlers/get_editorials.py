@@ -122,7 +122,7 @@ if conn is not None:
 else:
     print("Error! cannot create tha database connection.")
 
-# insert_edit_data(conn, editorials)
+insert_edit_data(conn, editorials)
 
 
 print(editorial_contests)
