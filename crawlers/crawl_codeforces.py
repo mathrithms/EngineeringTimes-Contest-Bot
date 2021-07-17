@@ -10,6 +10,13 @@ from psycopg2 import Error
 from datetime import datetime
 import datetime as dt
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+PASS = os.getenv("PASSWORD")
+PORT = os.getenv("PORT")
+DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
+
 # web Driver path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
 
@@ -17,8 +24,7 @@ chrome_options = Options()
 chrome_options.headless = True
 chrome_options.binary_location = r"C:\\Program Files (x86)\\Google\Chrome\\Application\\chrome.exe"
 
-driver = webdriver.Chrome(executable_path=PATH, chrome_options=chrome_options)
-
+driver = webdriver.Chrome(executable_path=PATH, options=chrome_options)
 
 # url to crawl
 url = 'https://codeforces.com/'
@@ -42,7 +48,7 @@ def insert_present_data(conn, present_contests):
     cursor.execute('DELETE FROM present_contests')
     for items in present_contests:
         try:
-            cursor.execute('INSERT INTO Present_Contests VALUES (%s,%s,%s,%s,0)', items)
+            cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,0)', items)
         except Error as e:
             conn.rollback()
             print(e)
@@ -87,9 +93,11 @@ def extract_present_data():
             '//div[@id="pageContent"]/div[1]/div[1]/div[6]/table/tbody/tr["+i+"]/td[3]/a')[i-1].text
         )
 
+    print(startTime)
+
     for start in range(1, rowsize):
         i = startTime[start-1]
-        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[13:17] + ':00'
+        j = i[7:11] + '-' + i[0:3] + '-' + i[4:6] + ' ' + i[12:17] + ':00'
         datetime_object = datetime.strptime(j, '%Y-%b-%d %H:%M:%S')
         startTime[start-1] = datetime_object
 
@@ -126,12 +134,12 @@ def extract_present_data():
 def get_present_data(conn):
 
     cursor = conn.cursor()
-    cursor.execute('SELECT name,start,duration FROM Present_Contests WHERE is_added = 0')
+    cursor.execute('SELECT name,start,duration FROM present_contests WHERE is_added = 0')
     list_p = cursor.fetchall()
     for item in list_p:
         list_present.append(item)
 
-    cursor.execute('UPDATE Present_Contests SET is_added = 1 ')
+    cursor.execute('UPDATE present_contests SET is_added = 1 ')
     conn.commit()
 
 
@@ -147,13 +155,13 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect("dbname=codeforces_new.db host=localhost port=5432 user=postgres password=pass")
+        conn = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT} user=postgres password={PASS}")
     except Error as e:
         conn.rollback()
         print(e)
 
     create_table_present = '''CREATE TABLE Present_Contests(
-                    NAME text UNIQUE,
+                    NAME text,
                     START text, DURATION text, ENDt text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
 
