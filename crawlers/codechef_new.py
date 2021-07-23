@@ -15,6 +15,7 @@ load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB_NAME_CHEF = os.getenv("DB_NAME_CC")
+USER = os.getenv("USER")
 
 # web Driver path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
@@ -263,7 +264,7 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
+        conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user={USER} password={PASS}")
 
     except Error as e:
         conn.rollback()
