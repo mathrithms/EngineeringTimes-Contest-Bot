@@ -11,6 +11,7 @@ load_dotenv()
 TOKEN = os.getenv("TOKEN")
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
+USER = os.getenv("USER")
 DB_NAME_CHEF = os.getenv("DB_NAME_CC")
 DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
 DB_NAME_GUILDS = os.getenv("DB_NAME_GUILDS")
@@ -22,12 +23,12 @@ client = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 
 
 # setting up connections to both the databases
-conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
-conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
-conn_info = psycopg2.connect(f"dbname={DB_NAME_GUILDS} host=localhost port={PORT} user=postgres password={PASS}")
-# conn_forces=psycopg2.connect(dbname="db_git2", host="localhost", port="9821", user="postgres", password="")
-# conn = psycopg2.connect(dbname="db_git", host="localhost", port="9821", user="postgres", password="")
-# conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=9821 user=postgres password= ")
+conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user={USER} password={PASS}")
+conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user={USER} password={PASS}")
+conn_info = psycopg2.connect(f"dbname={DB_NAME_GUILDS} host=localhost port={PORT} user={USER} password={PASS}")
+# conn_forces=psycopg2.connect(dbname="db_git2", host="localhost", port="9821", user={USER}, password="")
+# conn = psycopg2.connect(dbname="db_git", host="localhost", port="9821", user={USER}, password="")
+# conn_info = psycopg2.connect("dbname=guild_info.db host=localhost port=9821 user={USER} password= ")
 
 
 # loading all the commands when bot goes online
@@ -207,7 +208,7 @@ async def getlist():
     # sorted_events = c.fetchall()
     c.execute("""SELECT * FROM Future_Contests ORDER BY START""")
     sorted_events_future = c.fetchall()
-    c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
+    c_forces.execute("SELECT * FROM codeforces_pc ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
 
     upcoming_chef = []      # stores all ongoing codechef contest

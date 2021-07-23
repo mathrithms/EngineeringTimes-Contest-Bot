@@ -13,8 +13,9 @@ load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
+USER = os.getenv("USER")
 
-conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}")
+conn_forces = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user={USER} password={PASS}")
 
 
 class Codeforces(commands.Cog):
@@ -26,12 +27,12 @@ class Codeforces(commands.Cog):
     async def codeforces(self, ctx):
         # set up connections
         conn_command = psycopg2.connect(
-                                       f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user=postgres password={PASS}"
+                                       f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT}  user={USER} password={PASS}"
                                        )
         c_command = conn_command.cursor()
 
         # select all contest and store in a list
-        c_command.execute("SELECT * FROM Present_Contests ORDER BY START")
+        c_command.execute("SELECT * FROM codeforces_pc ORDER BY START")
         sorted_contests = c_command.fetchall()
 
         # store today and tomorrows date

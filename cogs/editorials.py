@@ -12,6 +12,7 @@ load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB_NAME_EDIT = os.getenv("DB_NAME_EDIT")
+USER = os.getenv("USER")
 
 
 class Editorials(commands.Cog):
@@ -21,7 +22,7 @@ class Editorials(commands.Cog):
     # command for getting recent editorials
     @commands.command()
     async def editorials(self, ctx):
-        conn_edit = psycopg2.connect(f"dbname={DB_NAME_EDIT} host=localhost port=5432  user=postgres password={PASS}")
+        conn_edit = psycopg2.connect(f"dbname={DB_NAME_EDIT} host=localhost port=5432  user={USER} password={PASS}")
         cur_edit = conn_edit.cursor()
 
         cur_edit.execute("SELECT * FROM editorial_info")    # getting list of editorials

@@ -12,8 +12,9 @@ from dotenv import load_dotenv
 load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
+USER = os.getenv("USER")
 
-conn_info = psycopg2.connect(f"dbname=guild_info.db host=localhost port={PORT} user=postgres password={PASS}")
+conn_info = psycopg2.connect(f"dbname=guild_info.db host=localhost port={PORT} user={USER} password={PASS}")
 
 
 class Help(commands.Cog):

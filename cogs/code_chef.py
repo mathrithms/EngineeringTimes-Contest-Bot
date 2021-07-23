@@ -14,9 +14,10 @@ load_dotenv()
 TOKEN = os.getenv("TOKEN")
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
+USER = os.getenv("USER")
 DB_NAME_CHEF = os.getenv("DB_NAME_CC")
 
-conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user=postgres password={PASS}")
+conn = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT} user={USER} password={PASS}")
 
 
 class Codechef(commands.Cog):
@@ -35,7 +36,7 @@ class Codechef(commands.Cog):
         elif pre_or_fut not in ['Present', 'Future', "All"]:
             pre_or_fut = 'Present'
 
-        conn_command = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT}  user=postgres password={PASS}")
+        conn_command = psycopg2.connect(f"dbname={DB_NAME_CHEF} host=localhost port={PORT}  user={USER} password={PASS}")
         c_command = conn_command.cursor()
 
         # store today and tomorrows date

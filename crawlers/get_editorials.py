@@ -26,6 +26,7 @@ load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB_NAME_EDIT = os.getenv("DB_NAME_EDIT")
+USER = os.getenv("USER")
 
 
 # create tables in database
@@ -107,7 +108,7 @@ editorials = list(zip(*lists))
 # establishing connections
 conn = None
 try:
-    conn = psycopg2.connect(f"dbname={DB_NAME_EDIT} host=localhost port={PORT} user=postgres password={PASS}")
+    conn = psycopg2.connect(f"dbname={DB_NAME_EDIT} host=localhost port={PORT} user={USER} password={PASS}")
 except Error as e:
     conn.rollback()
     print(e)

@@ -16,6 +16,7 @@ load_dotenv()
 PASS = os.getenv("PASSWORD")
 PORT = os.getenv("PORT")
 DB_NAME_CODEFORCES = os.getenv("DB_NAME_CF")
+USER = os.getenv("USER")
 
 # web Driver path
 PATH = "C:\\Program Files (x86)\\chromedriver.exe"
@@ -45,10 +46,10 @@ def create_table(conn, create_table_sql):
 def insert_present_data(conn, present_contests):
 
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM present_contests')
+    cursor.execute('DELETE FROM codeforces_pc')
     for items in present_contests:
         try:
-            cursor.execute('INSERT INTO present_contests VALUES (%s,%s,%s,%s,0)', items)
+            cursor.execute('INSERT INTO codeforces_pc VALUES (%s,%s,%s,%s,0)', items)
         except Error as e:
             conn.rollback()
             print(e)
@@ -134,12 +135,12 @@ def extract_present_data():
 def get_present_data(conn):
 
     cursor = conn.cursor()
-    cursor.execute('SELECT name,start,duration FROM present_contests WHERE is_added = 0')
+    cursor.execute('SELECT name,start,duration FROM codeforces_pc WHERE is_added = 0')
     list_p = cursor.fetchall()
     for item in list_p:
         list_present.append(item)
 
-    cursor.execute('UPDATE present_contests SET is_added = 1 ')
+    cursor.execute('UPDATE codeforces_pc SET is_added = 1 ')
     conn.commit()
 
 
@@ -155,12 +156,12 @@ def main():
     # database connection
     conn = None
     try:
-        conn = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT} user=postgres password={PASS}")
+        conn = psycopg2.connect(f"dbname={DB_NAME_CODEFORCES} host=localhost port={PORT} user={USER} password={PASS}")
     except Error as e:
         conn.rollback()
         print(e)
 
-    create_table_present = '''CREATE TABLE Present_Contests(
+    create_table_present = '''CREATE TABLE codeforces_pc(
                     NAME text,
                     START text, DURATION text, ENDt text,
                     is_added INTEGER NOT NULL CHECK(is_added IN (0,1)));'''
