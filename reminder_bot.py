@@ -208,7 +208,7 @@ async def getlist():
     # sorted_events = c.fetchall()
     c.execute("""SELECT * FROM Future_Contests ORDER BY START""")
     sorted_events_future = c.fetchall()
-    c_forces.execute("SELECT * FROM Present_Contests ORDER BY START")
+    c_forces.execute("SELECT * FROM codeforces_pc ORDER BY START")
     sorted_events_forces = c_forces.fetchall()
 
     upcoming_chef = []      # stores all ongoing codechef contest

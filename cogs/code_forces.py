@@ -32,7 +32,7 @@ class Codeforces(commands.Cog):
         c_command = conn_command.cursor()
 
         # select all contest and store in a list
-        c_command.execute("SELECT * FROM Present_Contests ORDER BY START")
+        c_command.execute("SELECT * FROM codeforces_pc ORDER BY START")
         sorted_contests = c_command.fetchall()
 
         # store today and tomorrows date
